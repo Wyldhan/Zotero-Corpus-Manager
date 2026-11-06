@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zotero-derlem-yoneticisi"
+version = "1.0.0"
+description = "Zotero kütüphaneleri için yazılım bilgisi gerektirmeyen otomatik sınıflandırma, derlem denetimi ve akıllı mükerrer birleştirme aracı."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+  {name = "Zotero Derlem Yöneticisi Ekibi"}
+]
+keywords = ["zotero", "corpus", "linguistics", "kurdish", "zazaki", "kirmancki", "deduplication", "bibliography"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Education",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Text Processing :: Linguistic",
+]
+dependencies = []
+
+[project.scripts]
+zotero-derlem = "zotero_cli:main"
+
+[tool.setuptools.packages.find]
+include = ["zotero_manager*"]

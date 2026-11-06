@@ -1,0 +1,705 @@
+"""Yazılım bilgisi gerektirmeyen, sıfır bağımlılıklı yerel Görsel Web Arayüzü (Dashboard)."""
+from __future__ import annotations
+
+import json
+import threading
+import urllib.parse
+import webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
+
+from .applier import apply_classification_sqlite, create_backup, list_backups, restore_backup
+from .classifier import classify_library, load_rules, DEFAULT_RULES_PATH
+from .deduplicator import execute_deduplication, find_duplicate_clusters
+from .detector import find_zotero_data_dir, is_zotero_running, start_zotero, stop_zotero_gracefully
+from .reader import load_library_snapshot
+from .reporter import compute_summary_stats, generate_csv_report, generate_markdown_report
+
+HTML_PAGE = r"""<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zotero Derlem & Otomatik Sınıflandırma Yöneticisi</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --success: #16a34a;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --border: #e2e8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5;
+  }
+  header {
+    background: #1e293b; color: #fff; padding: 1.2rem 2rem;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  }
+  header h1 { margin: 0; font-size: 1.35rem; display: flex; align-items: center; gap: 0.6rem; }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(255,255,255,0.12); padding: 0.4rem 0.9rem; border-radius: 999px; font-size: 0.85rem;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; display: inline-block; }
+  .dot.closed { background: #94a3b8; }
+  .container { max-width: 1280px; margin: 1.5rem auto; padding: 0 1.5rem; }
+  .dir-bar {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
+    margin-bottom: 1.25rem; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .dir-bar input {
+    flex: 1; min-width: 260px; padding: 0.55rem 0.8rem; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 0.95rem;
+  }
+  button {
+    cursor: pointer; border: none; border-radius: 7px; padding: 0.6rem 1.1rem;
+    font-size: 0.92rem; font-weight: 600; transition: all 0.15s; display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { filter: brightness(0.93); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-outline { background: #fff; color: var(--text); border: 1px solid var(--border); }
+  .btn-outline:hover { background: #f1f5f9; }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+  .tabs {
+    display: flex; gap: 0.5rem; border-bottom: 2px solid var(--border); margin-bottom: 1.25rem; flex-wrap: wrap;
+  }
+  .tab-btn {
+    background: transparent; color: var(--muted); border-radius: 8px 8px 0 0;
+    padding: 0.75rem 1.25rem; font-weight: 600; border-bottom: 3px solid transparent; margin-bottom: -2px;
+  }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #fff; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;
+  }
+  .kpi-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.25rem;
+  }
+  .kpi-card .label { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
+  .kpi-card .val { font-size: 1.85rem; font-weight: 700; margin-top: 0.25rem; color: var(--text); }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .card h3 { margin-top: 0; margin-bottom: 0.9rem; font-size: 1.05rem; border-bottom: 1px solid var(--border); padding-bottom: 0.6rem; }
+  .bar-row { margin-bottom: 0.65rem; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.2rem; }
+  .bar-track { background: #f1f5f9; height: 9px; border-radius: 99px; overflow: hidden; }
+  .bar-fill { background: var(--primary); height: 100%; border-radius: 99px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th, td { text-align: left; padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: #f8fafc; font-weight: 600; color: var(--muted); }
+  .badge {
+    display: inline-block; padding: 0.15rem 0.5rem; border-radius: 5px; font-size: 0.76rem;
+    font-weight: 600; background: #e0e7ff; color: #1e40af; margin: 0.1rem;
+  }
+  .badge.warn { background: #fef3c7; color: #92400e; }
+  .badge.ok { background: #dcfce7; color: #166534; }
+  .toast {
+    display: none; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.25rem;
+    font-weight: 500; border: 1px solid transparent;
+  }
+  .toast.info { display: block; background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+  .toast.success { display: block; background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+  .toast.error { display: block; background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+  .check-group { display: flex; gap: 1.25rem; flex-wrap: wrap; margin: 1rem 0; }
+  .check-group label { display: flex; align-items: center; gap: 0.45rem; font-size: 0.92rem; cursor: pointer; }
+  textarea.code-editor {
+    width: 100%; height: 420px; font-family: Consolas, Monaco, monospace; font-size: 0.86rem;
+    padding: 0.9rem; border: 1px solid var(--border); border-radius: 8px; background: #0f172a; color: #f8fafc;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📚 Zotero Derlem & Otomatik Sınıflandırma Yöneticisi</h1>
+  <div class="status-pill">
+    <span class="dot" id="zotDot"></span>
+    <span id="zotStatusText">Zotero durumu kontrol ediliyor...</span>
+  </div>
+</header>
+
+<div class="container">
+  <div class="dir-bar">
+    <strong>Zotero Klasörü:</strong>
+    <input type="text" id="zdirInput" placeholder="Örn: D:\Zotero">
+    <button class="btn-primary" onclick="scanLibrary()" id="btnScan">🔍 Kütüphaneyi Tara</button>
+    <button class="btn-outline" onclick="downloadReport('md')">📄 Markdown Rapor İndir</button>
+    <button class="btn-outline" onclick="downloadReport('csv')">📊 Excel (CSV) İndir</button>
+  </div>
+
+  <div id="toastBox" class="toast"></div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-overview', this)">1. Genel Bakış & Sınıflandırma</button>
+    <button class="tab-btn" onclick="switchTab('tab-dedup', this)">2. Akıllı Mükerrer Birleştirici</button>
+    <button class="tab-btn" onclick="switchTab('tab-explorer', this)">3. Kayıt Gezgini</button>
+    <button class="tab-btn" onclick="switchTab('tab-rules', this)">4. Kural & Derlem Ayarları</button>
+    <button class="tab-btn" onclick="switchTab('tab-backups', this)">5. Yedekleme & Geri Yükleme</button>
+  </div>
+
+  <!-- TAB 1: OVERVIEW & APPLY CLASSIFICATION -->
+  <div id="tab-overview" class="tab-panel active">
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="label">Toplam Üst Seviye Kayıt</div><div class="val" id="kpiTotal">-</div></div>
+      <div class="kpi-card"><div class="label">Tam Künyeli Bibliyografik Kayıt</div><div class="val" id="kpiRegular">-</div></div>
+      <div class="kpi-card"><div class="label">Üst Kaydı Olmayan (Standalone) PDF</div><div class="val" id="kpiStandalone">-</div></div>
+      <div class="kpi-card"><div class="label">Zazakî / Kirmanckî Derlemi</div><div class="val" id="kpiZazaki">-</div></div>
+      <div class="kpi-card"><div class="label">Kürtçe (Kurmancî / Soranî / Genel)</div><div class="val" id="kpiKurdish">-</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
+      <h3>⚡ Tek Tıkla Otomatik Sınıflandırmayı Zotero'ya Uygula</h3>
+      <p style="margin: 0.2rem 0 0.8rem; color: var(--muted); font-size: 0.92rem;">
+        Kütüphanenizdeki tüm kayıtları dil, hedef derlem, eser türü, araştırma konusu ve kalite kontrol durumuna göre
+        otomatik olarak Zotero koleksiyonlarına ayırır, etiketler ve hatalı dil kodlarını düzeltir. İşlem öncesi otomatik yedek alınır.
+      </p>
+      <div class="check-group">
+        <label><input type="checkbox" id="chkCols" checked> Koleksiyon ve Alt-Koleksiyon Ağacını Oluştur / Güncelle</label>
+        <label><input type="checkbox" id="chkTags" checked> Otomatik Etiketleri (<code>#dil:</code>, <code>#derlem:</code>, <code>#tur:</code>, <code>#konu:</code>) Ekle</label>
+        <label><input type="checkbox" id="chkLang" checked> Hatalı Dil Kodlarını (<code>zza</code>, <code>kmr</code>, <code>ckb</code>, <code>tr</code>, <code>en</code>) Düzelt</label>
+        <label><input type="checkbox" id="chkRestart" checked> Zotero Açıksa Güvenli Kapatıp İşlem Sonrası Yeniden Başlat</label>
+      </div>
+      <button class="btn-success" onclick="applyClassification()" id="btnApplyClass">✅ Sınıflandırmayı Şimdi Zotero'ya Uygula</button>
+    </div>
+
+    <div class="grid-2">
+      <div class="card"><h3>1. Derlemler & Hedef Diller (#derlem:...)</h3><div id="barsCorpus"></div></div>
+      <div class="card"><h3>2. Metin Diline Göre (#dil:...)</h3><div id="barsLang"></div></div>
+      <div class="card"><h3>3. Eser Türüne Göre (#tur:...)</h3><div id="barsType"></div></div>
+      <div class="card"><h3>4. Konu & Alt Alanlara Göre (#konu:...)</h3><div id="barsTopic"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>5. Derlem Denetim & Kalite Kontrol Bulguları (#kontrol:...)</h3>
+      <div id="barsAudit"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: SMART DEDUPLICATOR -->
+  <div id="tab-dedup" class="tab-panel">
+    <div class="card" style="margin-bottom: 1.25rem;">
+      <h3>🧹 Akıllı Mükerrer (Duplicate) Tespit ve Tek Dosyaya İndirme</h3>
+      <p style="color: var(--muted); font-size: 0.92rem; margin-top: 0;">
+        SHA-256 PDF dosya özeti, DOI ve normalize edilmiş başlık/yazar kurallarına göre mükerrer kayıtları bulur.
+        Her kümede <strong>en kapsamlı kaynakçaya sahip olan ana kaydı</strong> korur; diğer kopyalardaki eksik künye alanlarını,
+        koleksiyonları, notları ve <strong>en sağlam tek PDF dosyasını</strong> ana kayda bağlayıp geri kalan kopyaları siler.
+      </p>
+      <div style="display:flex; gap:0.8rem; flex-wrap:wrap; align-items:center;">
+        <button class="btn-primary" onclick="scanDuplicates()" id="btnScanDup">🔍 Mükerrerleri ve PDF Kopyalarını Analiz Et</button>
+        <button class="btn-danger" onclick="executeDedup()" id="btnExecDup" disabled>✨ Tüm Mükerrerleri Birleştir ve Tek Dosyaya İndir</button>
+        <span id="dupSummaryBadge" style="font-weight:600; color:var(--muted);"></span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Tespit Edilen Mükerrer Kümeleri</h3>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Korunacak Ana Kayıt (En Kapsamlı Kaynakça)</th>
+              <th>Birleştirilip Silinecek Mükerrer Kopyalar</th>
+              <th>Bağlanacak Tek PDF & Kazanç</th>
+            </tr>
+          </thead>
+          <tbody id="dupTableBody">
+            <tr><td colspan="4" style="color:var(--muted);">Analiz başlatmak için yukarıdaki "Mükerrerleri ve PDF Kopyalarını Analiz Et" düğmesine tıklayın.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: ITEM EXPLORER -->
+  <div id="tab-explorer" class="tab-panel">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1rem;">
+        <h3 style="margin:0; border:none; padding:0;">Kayıt Gezgini (İlk 250 Eşleşme)</h3>
+        <input type="text" id="searchFilter" placeholder="Başlık, yazar, #derlem:zazaki, #tur:sozluk ara..." oninput="renderExplorer()" style="min-width:320px; padding:0.5rem 0.8rem; border:1px solid var(--border); border-radius:6px;">
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Tür</th>
+              <th>Başlık & Yazar</th>
+              <th>Dil</th>
+              <th>Derlem & Konu Etiketleri</th>
+            </tr>
+          </thead>
+          <tbody id="explorerBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: RULES EDITOR -->
+  <div id="tab-rules" class="tab-panel">
+    <div class="card">
+      <h3>⚙️ Sınıflandırma Kuralları (`config/default_rules.json`)</h3>
+      <p style="color:var(--muted); font-size:0.9rem; margin-top:0;">
+        Yeni bir derlem, dil veya konu anahtar kelimesi eklemek için aşağıdaki JSON yapısını düzenleyip kaydedebilirsiniz.
+      </p>
+      <textarea id="rulesEditor" class="code-editor"></textarea>
+      <div style="margin-top:0.9rem;">
+        <button class="btn-success" onclick="saveRules()">💾 Kuralları Kaydet ve Yeniden Tara</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: BACKUPS -->
+  <div id="tab-backups" class="tab-panel">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h3 style="margin:0; border:none;">💾 Veritabanı Yedekleri (`zotero.sqlite.*.bak`)</h3>
+        <button class="btn-primary" onclick="manualBackup()">➕ Şimdi Yeni Yedek Al</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Yedek Dosyası</th><th>Tarih</th><th>Boyut</th><th>İşlem</th></tr>
+        </thead>
+        <tbody id="backupTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+let ALL_ITEMS = [];
+let DUP_CLUSTERS = [];
+
+function showToast(msg, kind='info') {
+  const el = document.getElementById('toastBox');
+  el.className = 'toast ' + kind;
+  el.innerHTML = msg;
+}
+
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+}
+
+function renderBars(containerId, dataObj, total) {
+  const el = document.getElementById(containerId);
+  const entries = Object.entries(dataObj || {});
+  if (!entries.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:0.88rem;">Kayıt bulunamadı.</div>';
+    return;
+  }
+  el.innerHTML = entries.map(([k, v]) => {
+    const pct = total > 0 ? Math.min(100, Math.round((v / total) * 100)) : 0;
+    return `<div class="bar-row">
+      <div class="bar-label"><span><strong>${k}</strong></span><span>${v.toLocaleString()} (${pct}%)</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(pct, 2)}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+async function scanLibrary() {
+  const zdir = document.getElementById('zdirInput').value.trim();
+  const btn = document.getElementById('btnScan');
+  btn.disabled = true;
+  showToast('⏳ Zotero veritabanı ve tam metin önbellekleri taranıyor...', 'info');
+  try {
+    const res = await fetch('/api/scan?zdir=' + encodeURIComponent(zdir));
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    document.getElementById('zdirInput').value = data.zdir;
+    const dot = document.getElementById('zotDot');
+    dot.className = 'dot ' + (data.zotero_running ? '' : 'closed');
+    document.getElementById('zotStatusText').textContent = data.zotero_running ? 'Zotero Açık' : 'Zotero Kapalı';
+
+    const st = data.stats;
+    document.getElementById('kpiTotal').textContent = st.total_items.toLocaleString();
+    document.getElementById('kpiRegular').textContent = st.regular_items.toLocaleString();
+    document.getElementById('kpiStandalone').textContent = st.standalone_pdfs.toLocaleString();
+    document.getElementById('kpiZazaki').textContent = (st.by_corpus['zazaki-kirmancki'] || 0).toLocaleString();
+    const kurdSum = (st.by_corpus['kurmanci'] || 0) + (st.by_corpus['sorani-gorani'] || 0) + (st.by_corpus['kurdoloji-genel'] || 0);
+    document.getElementById('kpiKurdish').textContent = kurdSum.toLocaleString();
+
+    renderBars('barsCorpus', st.by_corpus, st.total_items);
+    renderBars('barsLang', st.by_language, st.total_items);
+    renderBars('barsType', st.by_type, st.total_items);
+    renderBars('barsTopic', st.by_topic, st.total_items);
+    renderBars('barsAudit', st.by_audit, st.total_items);
+
+    ALL_ITEMS = data.items || [];
+    renderExplorer();
+    loadBackups();
+    showToast(`✅ Tarama tamamlandı: <strong>${st.total_items.toLocaleString()}</strong> üst seviye kayıt sınıflandırıldı.`, 'success');
+  } catch (e) {
+    showToast('❌ Hata: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderExplorer() {
+  const q = (document.getElementById('searchFilter').value || '').toLowerCase().trim();
+  const filtered = ALL_ITEMS.filter(it => {
+    if (!q) return true;
+    const blob = `${it.key} ${it.title} ${(it.creators||[]).join(' ')} ${(it.auto_tags||[]).join(' ')}`.toLowerCase();
+    return blob.includes(q);
+  }).slice(0, 250);
+
+  const tbody = document.getElementById('explorerBody');
+  tbody.innerHTML = filtered.map(it => `
+    <tr>
+      <td><code>${it.key}</code></td>
+      <td><span class="badge">${it.tur}</span></td>
+      <td><strong>${it.title || '(Başlıksız)'}</strong><br><small style="color:var(--muted)">${(it.creators||[]).join('; ')} ${it.date ? '('+it.date+')' : ''}</small></td>
+      <td><code>${it.doc_lang} (${it.expected_iso})</code></td>
+      <td>${(it.auto_tags||[]).map(t => `<span class="badge ${t.startsWith('#kontrol:')?'warn':''}">${t}</span>`).join(' ')}</td>
+    </tr>
+  `).join('');
+}
+
+async function applyClassification() {
+  const zdir = document.getElementById('zdirInput').value.trim();
+  const payload = {
+    zdir,
+    apply_collections: document.getElementById('chkCols').checked,
+    apply_tags: document.getElementById('chkTags').checked,
+    fix_languages: document.getElementById('chkLang').checked,
+    restart_zotero: document.getElementById('chkRestart').checked
+  };
+  const btn = document.getElementById('btnApplyClass');
+  btn.disabled = true;
+  showToast('⏳ Zotero yedekleniyor ve sınıflandırma uygulanıyor...', 'info');
+  try {
+    const res = await fetch('/api/apply-classification', {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const s = data.summary;
+    showToast(`✅ Sınıflandırma başarıyla uygulandı! Oluşturulan koleksiyon: <strong>${s.created_collections}</strong>, Koleksiyon bağı: <strong>${s.added_collection_links}</strong>, Yeni etiket: <strong>${s.added_item_tags}</strong>, Düzeltilen dil: <strong>${s.fixed_language_fields}</strong>.`, 'success');
+    await scanLibrary();
+  } catch (e) {
+    showToast('❌ Hata: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function scanDuplicates() {
+  const zdir = document.getElementById('zdirInput').value.trim();
+  const btn = document.getElementById('btnScanDup');
+  btn.disabled = true;
+  showToast('⏳ Tüm PDF dosyalarının SHA-256 özetleri, DOI ve künye başlıkları karşılaştırılıyor...', 'info');
+  try {
+    const res = await fetch('/api/scan-duplicates?zdir=' + encodeURIComponent(zdir));
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    DUP_CLUSTERS = data.clusters || [];
+    document.getElementById('dupSummaryBadge').textContent =
+      `${DUP_CLUSTERS.length} mükerrer kümesi bulundu (${data.total_losers} kopya kayıt, ${data.freed_mb} MB fazlalık PDF)`;
+    document.getElementById('btnExecDup').disabled = DUP_CLUSTERS.length === 0;
+
+    const tbody = document.getElementById('dupTableBody');
+    if (!DUP_CLUSTERS.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--success);font-weight:600;">🎉 Kütüphanenizde hiç mükerrer kayıt veya kopya PDF kalmadı!</td></tr>';
+    } else {
+      tbody.innerHTML = DUP_CLUSTERS.map((c, i) => `
+        <tr>
+          <td>${i+1}</td>
+          <td>
+            <span class="badge ok">ANA KAYIT (${c.winner_type}, Puan: ${c.winner_score})</span>
+            <code>${c.winner_key}</code><br>
+            <strong>${c.winner_title}</strong><br>
+            <small style="color:var(--muted)">${(c.winner_creators||[]).join('; ')} ${c.winner_date ? '('+c.winner_date+')' : ''} ${c.winner_doi ? '• DOI: '+c.winner_doi : ''}</small>
+          </td>
+          <td>
+            ${c.loser_keys.map((k, idx) => `<div><span class="badge warn">SİLİNECEK</span> <code>${k}</code>: ${(c.loser_titles[idx]||'').slice(0,75)}</div>`).join('')}
+          </td>
+          <td>
+            ${c.best_att ? `<span class="badge ok">PDF Korunacak (${Math.round(c.best_att.size/1024)} KB)</span>` : '<span class="badge">PDF Yok</span>'}
+            ${c.freed_bytes > 0 ? `<br><small style="color:var(--danger)">+${(c.freed_bytes/(1024*1024)).toFixed(2)} MB kopya silinecek</small>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+    showToast(`✅ Mükerrer analizi tamamlandı: <strong>${DUP_CLUSTERS.length}</strong> küme tespit edildi.`, 'success');
+  } catch (e) {
+    showToast('❌ Hata: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function executeDedup() {
+  if (!confirm('Mükerrer kayıtlar en kapsamlı kaynakçaya sahip ana kayıtla birleştirilecek, en sağlam tek PDF ana kayda bağlanacak ve geri kalan kopyalar silinecektir (işlem öncesi tam yedek alınır). Onaylıyor musunuz?')) return;
+  const zdir = document.getElementById('zdirInput').value.trim();
+  const btn = document.getElementById('btnExecDup');
+  btn.disabled = true;
+  showToast('⏳ Zotero yedekleniyor, mükerrerler birleştiriliyor ve tek dosyaya indiriliyor...', 'info');
+  try {
+    const res = await fetch('/api/execute-dedup', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({zdir, restart_zotero: true})
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const s = data.summary;
+    showToast(`✅ Mükerrer temizliği tamamlandı! Çözülen küme: <strong>${s.clusters_resolved}</strong>, Silinen mükerrer kayıt: <strong>${s.deleted_duplicate_items}</strong>, Ana kayda bağlanan PDF: <strong>${s.reparented_standalone_or_child_pdfs}</strong>, Kazanılan alan: <strong>${s.freed_megabytes} MB</strong>.`, 'success');
+    await scanDuplicates();
+    await scanLibrary();
+  } catch (e) {
+    showToast('❌ Hata: ' + e.message, 'error');
+  }
+}
+
+async function loadRules() {
+  const res = await fetch('/api/rules');
+  const data = await res.json();
+  document.getElementById('rulesEditor').value = JSON.stringify(data, null, 2);
+}
+
+async function saveRules() {
+  try {
+    const parsed = JSON.parse(document.getElementById('rulesEditor').value);
+    const res = await fetch('/api/rules', {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(parsed)
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    showToast('✅ Kurallar kaydedildi, kütüphane yeniden taranıyor...', 'success');
+    await scanLibrary();
+  } catch (e) {
+    showToast('❌ Geçersiz JSON veya kaydetme hatası: ' + e.message, 'error');
+  }
+}
+
+async function loadBackups() {
+  const zdir = document.getElementById('zdirInput').value.trim();
+  const res = await fetch('/api/backups?zdir=' + encodeURIComponent(zdir));
+  const data = await res.json();
+  const tbody = document.getElementById('backupTableBody');
+  tbody.innerHTML = (data.backups || []).map(b => `
+    <tr>
+      <td><code>${b.name}</code></td>
+      <td>${b.modified}</td>
+      <td>${b.size_mb} MB</td>
+      <td><button class="btn-outline" onclick="restoreBackup('${b.path.replace(/\\/g, '\\\\')}')">⏪ Bu Yedeğe Geri Dön</button></td>
+    </tr>
+  `).join('');
+}
+
+async function manualBackup() {
+  const zdir = document.getElementById('zdirInput').value.trim();
+  const res = await fetch('/api/create-backup', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({zdir})
+  });
+  const data = await res.json();
+  if (data.error) { showToast('❌ ' + data.error, 'error'); return; }
+  showToast('✅ Yeni yedek oluşturuldu: ' + data.backup_file, 'success');
+  loadBackups();
+}
+
+async function restoreBackup(path) {
+  if (!confirm('Seçilen yedek dosyası aktif Zotero veritabanı olarak geri yüklenecektir. Devam edilsin mi?')) return;
+  const zdir = document.getElementById('zdirInput').value.trim();
+  const res = await fetch('/api/restore-backup', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({zdir, backup_path: path})
+  });
+  const data = await res.json();
+  if (data.error) { showToast('❌ ' + data.error, 'error'); return; }
+  showToast('✅ Yedek başarıyla geri yüklendi!', 'success');
+  await scanLibrary();
+}
+
+function downloadReport(fmt) {
+  const zdir = document.getElementById('zdirInput').value.trim();
+  window.open(`/api/export?fmt=${fmt}&zdir=${encodeURIComponent(zdir)}`, '_blank');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  scanLibrary();
+  loadRules();
+});
+</script>
+</body>
+</html>
+"""
+
+
+class DashboardHandler(BaseHTTPRequestHandler):
+    default_zdir: Path = find_zotero_data_dir()
+
+    def log_message(self, format: str, *args) -> None:
+        pass  # Konsolu temiz tut
+
+    def _send_json(self, data: dict | list, status: int = 200) -> None:
+        raw = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
+
+    def _read_body(self) -> dict:
+        length = int(self.headers.get("Content-Length", "0"))
+        if length <= 0:
+            return {}
+        return json.loads(self.rfile.read(length).decode("utf-8"))
+
+    def do_GET(self) -> None:
+        parsed = urllib.parse.urlparse(self.path)
+        qs = urllib.parse.parse_qs(parsed.query)
+        zdir_str = (qs.get("zdir", [""])[0] or "").strip()
+        zdir = find_zotero_data_dir(zdir_str) if zdir_str else self.default_zdir
+
+        try:
+            if parsed.path == "/":
+                raw = HTML_PAGE.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(raw)))
+                self.end_headers()
+                self.wfile.write(raw)
+            elif parsed.path == "/api/scan":
+                entries = load_library_snapshot(zdir, compute_hashes=False)
+                results = classify_library(entries)
+                stats = compute_summary_stats(results)
+                self._send_json({
+                    "zdir": str(zdir),
+                    "zotero_running": is_zotero_running(),
+                    "stats": stats,
+                    "items": list(results.values()),
+                })
+            elif parsed.path == "/api/scan-duplicates":
+                entries = load_library_snapshot(zdir, compute_hashes=True)
+                clusters = find_duplicate_clusters(entries)
+                total_losers = sum(len(c["loser_ids"]) for c in clusters)
+                freed_mb = round(sum(c["freed_bytes"] for c in clusters) / (1024 * 1024), 2)
+                self._send_json({
+                    "clusters": clusters,
+                    "total_losers": total_losers,
+                    "freed_mb": freed_mb,
+                })
+            elif parsed.path == "/api/rules":
+                self._send_json(load_rules())
+            elif parsed.path == "/api/backups":
+                self._send_json({"backups": list_backups(zdir)})
+            elif parsed.path == "/api/export":
+                fmt = qs.get("fmt", ["md"])[0]
+                entries = load_library_snapshot(zdir, compute_hashes=False)
+                results = classify_library(entries)
+                if fmt == "csv":
+                    raw = generate_csv_report(results).encode("utf-8")
+                    ctype = "text/csv; charset=utf-8"
+                    fname = "zotero_siniflandirma.csv"
+                else:
+                    raw = generate_markdown_report(zdir, results).encode("utf-8")
+                    ctype = "text/markdown; charset=utf-8"
+                    fname = "zotero_derlem_raporu.md"
+                self.send_response(200)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Content-Disposition", f'attachment; filename="{fname}"')
+                self.send_header("Content-Length", str(len(raw)))
+                self.end_headers()
+                self.wfile.write(raw)
+            else:
+                self._send_json({"error": "Not found"}, 404)
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def do_POST(self) -> None:
+        parsed = urllib.parse.urlparse(self.path)
+        try:
+            body = self._read_body()
+            zdir_str = (body.get("zdir") or "").strip()
+            zdir = find_zotero_data_dir(zdir_str) if zdir_str else self.default_zdir
+
+            if parsed.path == "/api/apply-classification":
+                entries = load_library_snapshot(zdir, compute_hashes=False)
+                results = classify_library(entries)
+                was_running = is_zotero_running()
+                restart = bool(body.get("restart_zotero", True))
+                if was_running and restart:
+                    stop_zotero_gracefully()
+                summary = apply_classification_sqlite(
+                    zdir,
+                    entries,
+                    results,
+                    apply_collections=bool(body.get("apply_collections", True)),
+                    apply_tags=bool(body.get("apply_tags", True)),
+                    fix_languages=bool(body.get("fix_languages", True)),
+                )
+                if was_running and restart:
+                    start_zotero()
+                self._send_json({"summary": summary})
+
+            elif parsed.path == "/api/execute-dedup":
+                entries = load_library_snapshot(zdir, compute_hashes=True)
+                clusters = find_duplicate_clusters(entries)
+                was_running = is_zotero_running()
+                restart = bool(body.get("restart_zotero", True))
+                if was_running and restart:
+                    stop_zotero_gracefully()
+                summary = execute_deduplication(zdir, clusters, entries)
+                if was_running and restart:
+                    start_zotero()
+                self._send_json({"summary": summary})
+
+            elif parsed.path == "/api/rules":
+                DEFAULT_RULES_PATH.write_text(json.dumps(body, ensure_ascii=False, indent=2), encoding="utf-8")
+                self._send_json({"ok": True})
+
+            elif parsed.path == "/api/create-backup":
+                bak = create_backup(zdir, label="manual")
+                self._send_json({"backup_file": str(bak)})
+
+            elif parsed.path == "/api/restore-backup":
+                was_running = is_zotero_running()
+                if was_running:
+                    stop_zotero_gracefully()
+                restored = restore_backup(zdir, body["backup_path"])
+                if was_running:
+                    start_zotero()
+                self._send_json({"restored": str(restored)})
+
+            else:
+                self._send_json({"error": "Not found"}, 404)
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+
+def launch_web_ui(zdir: Path | None = None, port: int = 8765, open_browser: bool = True) -> None:
+    if zdir:
+        DashboardHandler.default_zdir = zdir
+    server = HTTPServer(("127.0.0.1", port), DashboardHandler)
+    url = f"http://127.0.0.1:{port}"
+    print(f"============================================================")
+    print(f" Zotero Derlem & Sınıflandırma Yöneticisi Arayüzü Çalışıyor")
+    print(f" Tarayıcı Adresi : {url}")
+    print(f" Zotero Dizini   : {DashboardHandler.default_zdir}")
+    print(f" Kapatmak için bu pencerede Ctrl+C tuşlarına basın.")
+    print(f"============================================================")
+    if open_browser:
+        threading.Timer(0.6, lambda: webbrowser.open(url)).start()
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nSunucu kapatıldı.")
+        server.server_close()

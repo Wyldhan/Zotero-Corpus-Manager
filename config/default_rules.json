@@ -1,0 +1,277 @@
+{
+  "version": "1.0.0",
+  "collection_roots": {
+    "derlem": "1. Derlemler & Hedef Diller",
+    "dil": "2. Metin Diline Göre",
+    "tur": "3. Eser Türüne Göre",
+    "konu": "4. Konu & Alt Alanlara Göre",
+    "kontrol": "5. Derlem Denetim & Kalite Kontrol"
+  },
+  "languages": [
+    {
+      "id": "kirmancki",
+      "iso": "zza",
+      "collection": "Dil: Kirmanckî (Zazakî)",
+      "keywords": [
+        "çekuy\\w*", "rawey\\w*", "nameyê", "mîyanê", "hûmar\\w*", "rîpel\\w*",
+        "kerden[ea]", "bîyayen[ea]", "vatene", "vano", "şuxulnayîş\\w*",
+        "taybetmendî\\w*", "pêveronayîş\\w*", "bestoğ\\w*", "zerfî", "wextî",
+        "kirmanckîya", "zazakîya", "ewro", "nika", "coka", "eke", "labelê",
+        "çimkî", "zayend\\b", "vengê", "di\\s+wext[îi]", "de\\s+zerf[îi]",
+        "di\\s+bestoğ[îi]", "fekê\\s+çewlîgî", "asta\\s+segmentale"
+      ]
+    },
+    {
+      "id": "kurmanci",
+      "iso": "kmr",
+      "collection": "Dil: Kurmancî",
+      "keywords": [
+        "lêker\\w*", "hevok\\w*", "peyv\\w*", "rêziman\\w*", "veqetandek\\w*",
+        "ergatîv\\w*", "zimanê\\s+kurdî", "di\\s+kurmancî\\s+de", "wêjeya",
+        "bikaranîna", "berawird\\w*", "navdêr\\w*", "cînav\\w*", "rengdêr\\w*",
+        "kurmancî\\s+û\\s+soranî"
+      ]
+    },
+    {
+      "id": "sorani",
+      "iso": "ckb",
+      "collection": "Dil: Soranî (Arap-Kürt Alfabesi)",
+      "keywords": ["کورد", "زمانی", "فەرهەنگ", "ڕێزمان", "گۆڤاری"]
+    },
+    {
+      "id": "turkce",
+      "iso": "tr",
+      "collection": "Dil: Türkçe",
+      "keywords": [
+        "üzerine", "inceleme", "araştırma\\w*", "özet", "giriş", "sonuç",
+        "kaynakça", "olarak", "arasında", "tarafından", "kullanım\\w*",
+        "özellikler\\w*", "bağlamında", "açısından", "örneği", "dair",
+        "ilişkin", "karşılaştır\\w*", "değerlendiril\\w*", "üniversitesi",
+        "dergisi", "fakültesi", "enstitüsü", "toplantısı"
+      ]
+    },
+    {
+      "id": "almanca",
+      "iso": "de",
+      "collection": "Dil: Almanca",
+      "keywords": [
+        "untersuchung", "sprache", "grammatik", "verbfunktionalität",
+        "ergativität", "partikeln", "handbücher", "sprachwissenschaft",
+        "beiträge", "zeitschrift"
+      ]
+    },
+    {
+      "id": "fransizca",
+      "iso": "fr",
+      "collection": "Dil: Fransızca",
+      "keywords": [
+        "langue", "étude", "grammaire", "kurde", "approche", "linguistique", "syntaxe"
+      ]
+    },
+    {
+      "id": "farsca-arapca",
+      "iso": "fa",
+      "collection": "Dil: Farsça & Arapça",
+      "keywords": []
+    },
+    {
+      "id": "ingilizce",
+      "iso": "en",
+      "collection": "Dil: İngilizce",
+      "keywords": []
+    }
+  ],
+  "corpora": [
+    {
+      "id": "zazaki-kirmancki",
+      "collection": "1.1 Zazakî / Kirmanckî Derlemi",
+      "description": "Zazakî/Kirmanckî dilbilgisi, sözlük, ağız, edebiyat ve Kirmanckî metinler",
+      "keywords": [
+        "zaza", "zazaki", "zazakî", "zazaca\\w*", "kirmanck\\w*", "kirdk\\w*",
+        "kırdk\\w*", "dimil\\w*", "dımıl\\w*", "sobe\\s+zaza", "zaza-sprache",
+        "zaza\\s+language", "zaza\\s+dil\\w*", "dersim\\s+ağz\\w*", "bingöl\\s+ağz\\w*",
+        "çewlîg\\w*", "gimgim\\w*", "siverek\\s+ağz\\w*", "palu\\s+ağz\\w*",
+        "grûba\\s+xebate\\s+ya\\s+vate\\w*", "kovara\\s+vate\\w*"
+      ]
+    },
+    {
+      "id": "kurmanci",
+      "collection": "1.2 Kurmancî Derlemi",
+      "description": "Kurmancî dilbilgisi, sözlük, NLP, edebiyat ve toplumdilbilim çalışmaları",
+      "keywords": [
+        "kurmanc\\w*", "kurmanj\\w*", "kurmancî", "kuzey\\s+kürtçe\\w*",
+        "northern\\s+kurdish", "badîn\\w*", "bahdîn\\w*", "botan\\b",
+        "hakkari\\s+ağz\\w*", "mardin\\s+kürtçe\\w*"
+      ]
+    },
+    {
+      "id": "sorani-gorani",
+      "collection": "1.3 Soranî, Goranî & Güney Kürtçesi",
+      "description": "Soranî, Goranî/Hewramî, Kelhurî ve Lekî çalışmaları",
+      "keywords": [
+        "soran\\w*", "central\\s+kurdish", "hewram\\w*", "hawram\\w*",
+        "gorani", "gurani", "gūrānī", "goranî", "kelhur\\w*", "kalhor\\w*",
+        "southern\\s+kurdish", "lekî", "laki\\s+kurd\\w*", "mukri\\w*"
+      ]
+    },
+    {
+      "id": "kurdoloji-genel",
+      "collection": "1.4 Kürdoloji (Genel & Karşılaştırmalı)",
+      "description": "Birden fazla Kürt lehçesini kapsayan veya genel Kürdoloji yayınları",
+      "keywords": [
+        "kurd\\w*", "kürt\\w*", "kurdish", "kurdî", "kürtçe\\w*", "kurdistan\\w*", "kürdoloji\\w*"
+      ]
+    },
+    {
+      "id": "irani-diller",
+      "collection": "1.5 İrani Diller & Hint-İran",
+      "description": "Farsça, Beluçça, Koroshi, Talışça, Osetçe, Orta İrani ve karşılaştırmalı İrani diller",
+      "keywords": [
+        "iranian", "irani\\s+dil\\w*", "indo-iranian", "persian", "farsça", "farsi",
+        "baloch\\w*", "beluç\\w*", "koroshi", "gilaki", "mazandaran\\w*", "talysh\\w*",
+        "talış\\w*", "osset\\w*", "pashto", "peştuca", "avestan", "middle\\s+persian",
+        "pahlavi", "parthian", "sogdian", "khotanese", "iranistik", "iranica"
+      ]
+    },
+    {
+      "id": "turkce-turkoloji",
+      "collection": "1.6 Türkçe & Türkoloji Derlemi",
+      "description": "Türkiye Türkçesi, Osmanlıca, ağız araştırmaları ve Türkçe eğitimi/NLP",
+      "keywords": [
+        "türkçe\\w*", "türk\\s+dil\\w*", "turkish\\b", "turkic\\b",
+        "osmanlı\\s+türkçe\\w*", "eski\\s+anadolu\\s+türkçe\\w*",
+        "türkiye\\s+türkçe\\w*", "ortaöğretim\\s+türkçe", "yabancılara\\s+türkçe",
+        "türk\\s+gramer\\w*"
+      ]
+    },
+    {
+      "id": "genel-dilbilim",
+      "collection": "1.7 Genel Dilbilim & Dünya Dilleri",
+      "description": "Kuramsal dilbilim, derlem dilbilimi, tipoloji ve İngilizce/diğer dünya dilleri",
+      "keywords": []
+    }
+  ],
+  "topics": [
+    {
+      "id": "morfoloji-allomorfi",
+      "collection": "Konu: Morfoloji, Allomorfi & Ergativite",
+      "keywords": [
+        "allomorf\\w*", "allomorph\\w*", "morfolo\\w*", "morpholog\\w*",
+        "biçimbilim\\w*", "biçimbirim\\w*", "inflection\\w*", "derivation\\w*",
+        "ergativ\\w*", "ergatîv\\w*", "clitic\\w*", "klitik\\w*", "affix\\w*",
+        "suffix\\w*", "prefix\\w*", "ekler\\w*", "hal\\s+eki", "durum\\s+eki",
+        "çekim\\w*", "yapım\\s+ek\\w*", "fiil\\s+yapı\\w*", "rawey\\w*",
+        "büküm", "izafe\\w*", "ezafe", "zayend\\b", "gender\\b", "cînav\\w*", "جێناو", "pronoun\\w*"
+      ]
+    },
+    {
+      "id": "fonoloji-sesbilim",
+      "collection": "Konu: Fonoloji, Sesbilim & Morfonoloji",
+      "keywords": [
+        "fonolo\\w*", "phonolog\\w*", "fonetik\\w*", "phonetic\\w*", "sesbilim\\w*",
+        "ses\\s+bilgisi", "morfonolo\\w*", "morphophon\\w*", "ünlü\\s+uyumu",
+        "ünsüz\\w*", "vowel\\w*", "consonant\\w*", "prosod\\w*", "syllable",
+        "hece\\b", "vurgu\\b", "acoustic", "segmental\\w*", "suprasegmental\\w*", "veng\\w*"
+      ]
+    },
+    {
+      "id": "sozdizimi-tipoloji",
+      "collection": "Konu: Sözdizimi (Syntax) & Tipoloji",
+      "keywords": [
+        "sözdizim\\w*", "sentaks\\w*", "syntax", "syntactic\\w*", "cümle\\s+yapı\\w*",
+        "word\\s+order", "clause\\w*", "typolog\\w*", "tipoloji\\w*", "universals",
+        "evrenseller", "adposition\\w*", "relative\\s+clause\\w*", "split\\s+ergativ\\w*",
+        "noun\\s+phrase\\w*", "verb\\s+phrase\\w*", "hevok\\w*"
+      ]
+    },
+    {
+      "id": "anlambilim-kip-zaman",
+      "collection": "Konu: Anlambilim, Kip-Zaman & Edat/Zarf",
+      "keywords": [
+        "anlambilim\\w*", "semantic\\w*", "semantik\\w*", "modality", "modal\\w*",
+        "kip\\w*", "zaman\\b", "tense", "aspect\\w*", "görünüş", "evidential\\w*",
+        "kanıt\\w*", "negation", "olumsuzluk", "partikeln", "particles", "zerf\\w*",
+        "adverb\\w*", "bestoğ\\w*", "conjunction\\w*", "bağlaç\\w*", "edat\\w*",
+        "grammaticalization", "dilbilgiselleşme", "wext\\w*"
+      ]
+    },
+    {
+      "id": "sozlukbilim-etimoloji",
+      "collection": "Konu: Sözlükbilim, Sözvarlığı & Etimoloji",
+      "keywords": [
+        "sözlük\\w*", "leksiko\\w*", "lexicograph\\w*", "lexicolog\\w*", "vocabulary",
+        "söz\\s*varlığ\\w*", "etimolo\\w*", "etymolog\\w*", "phraseolog\\w*",
+        "idiom\\w*", "deyim\\w*", "îdyom\\w*", "loanword\\w*", "alıntı\\s+kelime\\w*",
+        "terminolo\\w*", "terim\\w*", "ferheng\\w*"
+      ]
+    },
+    {
+      "id": "derlem-dilbilimi",
+      "collection": "Konu: Derlem Dilbilimi (Corpus Linguistics)",
+      "keywords": [
+        "corpus", "corpora", "derlem\\w*", "bütünc\\w*", "collocation\\w*",
+        "eşdizim\\w*", "concordanc\\w*", "kwic\\b", "frequency", "sıklık\\b",
+        "lancsbox", "sketch\\s+engine", "bnc\\b", "coca\\b"
+      ]
+    },
+    {
+      "id": "nlp-hesaplamali",
+      "collection": "Konu: Doğal Dil İşleme (NLP) & Hesaplamalı",
+      "keywords": [
+        "nlp\\b", "natural\\s+language\\s+processing", "doğal\\s+dil\\s+işleme",
+        "computational\\s+linguistics", "hesaplamalı\\s+dilbilim", "machine\\s+translation",
+        "makine\\s+çevirisi", "neural", "deep\\s+learning", "derin\\s+öğrenme",
+        "makine\\s+öğrenmesi", "machine\\s+learning", "transformer\\w*", "llm\\w*",
+        "large\\s+language\\s+model\\w*", "bert\\b", "gpt\\b", "tokeniz\\w*",
+        "speech\\s+recognition", "asr\\b", "tts\\b", "ocr\\b", "optical\\s+character",
+        "treebank\\w*", "universal\\s+dependencies", "pos\\s+tag\\w*",
+        "part\\s+of\\s+speech\\s+tag\\w*", "lemmatiz\\w*", "spell\\s*check\\w*",
+        "low-resource", "vector\\s+model", "search\\s+engine\\w*", "synthesizer",
+        "annotation", "literary\\s+computing"
+      ]
+    },
+    {
+      "id": "soylem-toplumdilbilim",
+      "collection": "Konu: Söylem, Toplumdilbilim & Çeviri",
+      "keywords": [
+        "discourse", "söylem\\w*", "pragmatic\\w*", "edimbilim\\w*",
+        "sociolinguistic\\w*", "toplumdilbilim\\w*", "language\\s+policy",
+        "dil\\s+politika\\w*", "bilingual\\w*", "iki\\s*dilli\\w*", "multilingual\\w*",
+        "mother\\s+tongue", "ana\\s*dili\\s+hakk\\w*", "tehlike\\s+altında\\w*",
+        "endangered\\s+lang\\w*", "revitali[sz]ation", "vitality", "identity",
+        "kimlik", "ideolog\\w*", "media\\b", "journalism", "gazetecilik",
+        "critical\\s+discourse", "translation", "çeviri\\w*", "açarnayîş\\w*", "frame\\s+markers"
+      ]
+    },
+    {
+      "id": "diyalektoloji-agiz",
+      "collection": "Konu: Diyalektoloji & Ağız Araştırmaları",
+      "keywords": [
+        "diyalekt\\w*", "dialect\\w*", "ağız\\w*", "ağzı\\b", "fekê",
+        "pêveronayîş\\w*", "variation", "varyasyon", "isogloss\\w*", "bingöl",
+        "tunceli", "dersim", "siverek", "çermik", "varto", "gimgim", "çewlîg",
+        "palu", "erzincan", "mutki", "diyarbakır"
+      ]
+    },
+    {
+      "id": "dil-egitimi",
+      "collection": "Konu: Dil Eğitimi & Öğretimi",
+      "keywords": [
+        "öğretim\\w*", "eğitim\\w*", "teaching", "learning", "instruction\\w*",
+        "pedagog\\w*", "ders\\s+kitab\\w*", "curriculum", "müfredat",
+        "acquisition", "edinim\\w*", "efl\\b", "learners"
+      ]
+    },
+    {
+      "id": "edebiyat-tarih-kultur",
+      "collection": "Konu: Edebiyat, Tarih & Kültür",
+      "keywords": [
+        "edebiyat\\w*", "literatur\\w*", "wêje\\w*", "folklor\\w*", "folklore",
+        "şiir\\w*", "poet\\w*", "roman\\w*", "novel\\w*", "hikaye\\w*",
+        "narrative\\w*", "tarih\\w*", "history", "historical", "kültür\\w*",
+        "cultur\\w*", "mitoloji\\w*", "myth\\w*", "aşiret\\w*", "tribe\\w*",
+        "şecere", "nationalism", "rivalry"
+      ]
+    }
+  ]
+}
