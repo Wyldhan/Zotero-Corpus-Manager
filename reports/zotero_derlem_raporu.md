@@ -1,11 +1,11 @@
-# Zotero Kütüphanesi Otomatik Sınıflandırma ve Derlem Denetim Raporu
+# Zotero Kütüphanesi Otomatik Sınıflandırma ve Derlem Denetim Raporu / Zotero Library Classification & Corpus Audit Report
 
-- **Veritabanı Konumu**: `D:\Zotero\zotero.sqlite`
-- **Toplam Üst Seviye Kayıt**: **2,044** (`1,949` bibliyografik kayıt + `95` üst kaydı olmayan PDF)
+- **Veritabanı Konumu / Database Path**: `D:\Zotero\zotero.sqlite`
+- **Toplam Üst Seviye Kayıt / Total Top-Level Items**: **2,044** (`1,949` bibliyografik kayıt / bibliographic items + `95` üst kayıtsız PDF / standalone PDFs)
 
-## 1. Hedef Dil ve Derlem Dağılımı (`1. Derlemler & Hedef Diller`)
+## 1. Hedef Dil ve Derlem Dağılımı / Target Language & Corpus Distribution (`1. Derlemler & Hedef Diller`)
 
-| Derlem / Hedef Dil Grubu | Etiket | Kayıt Sayısı |
+| Derlem / Target Corpus | Etiket / Tag | Kayıt Sayısı / Count |
 |---|---|---:|
 | **genel-dilbilim** | `#derlem:genel-dilbilim` | **1,277** |
 | **zazaki-kirmancki** | `#derlem:zazaki-kirmancki` | **263** |
@@ -15,9 +15,9 @@
 | **irani-diller** | `#derlem:irani-diller` | **111** |
 | **kurmanci** | `#derlem:kurmanci` | **99** |
 
-## 2. Metin Diline Göre Dağılım (`2. Metin Diline Göre`)
+## 2. Metin Diline Göre Dağılım / Distribution by Document Language (`2. Metin Diline Göre`)
 
-| Metin Dili | Etiket | Kayıt Sayısı |
+| Metin Dili / Document Language | Etiket / Tag | Kayıt Sayısı / Count |
 |---|---|---:|
 | **Ingilizce** | `#dil:ingilizce` | **1,631** |
 | **Turkce** | `#dil:turkce` | **336** |
@@ -27,9 +27,9 @@
 | **Sorani** | `#dil:sorani` | **10** |
 | **Farsca-Arapca** | `#dil:farsca-arapca` | **5** |
 
-## 3. Eser Türüne Göre Dağılım (`3. Eser Türüne Göre`)
+## 3. Eser Türüne Göre Dağılım / Distribution by Item Type (`3. Eser Türüne Göre`)
 
-| Eser Türü | Etiket | Kayıt Sayısı |
+| Eser Türü / Item Type | Etiket / Tag | Kayıt Sayısı / Count |
 |---|---|---:|
 | **makale** | `#tur:makale` | **1,087** |
 | **kitap-bolum** | `#tur:kitap-bolum` | **522** |
@@ -41,9 +41,9 @@
 | **edebi-folklor** | `#tur:edebi-folklor` | **19** |
 | **dergi-gazete** | `#tur:dergi-gazete` | **3** |
 
-## 4. Konu ve Alt Alan Dağılımı (`4. Konu & Alt Alanlara Göre`)
+## 4. Konu ve Alt Alan Dağılımı / Distribution by Research Topic (`4. Konu & Alt Alanlara Göre`)
 
-| Konu / Alt Alan | Etiket | Kayıt Sayısı |
+| Konu / Research Topic | Etiket / Tag | Kayıt Sayısı / Count |
 |---|---|---:|
 | **derlem-dilbilimi** | `#konu:derlem-dilbilimi` | **716** |
 | **morfoloji-allomorfi** | `#konu:morfoloji-allomorfi` | **454** |
@@ -59,9 +59,9 @@
 | **fonoloji-sesbilim** | `#konu:fonoloji-sesbilim` | **111** |
 | **alan-disi** | `#konu:alan-disi` | **9** |
 
-## 5. Derlem Denetim & Kalite Kontrol Bulguları (`5. Derlem Denetim & Kalite Kontrol`)
+## 5. Derlem Denetim & Kalite Kontrol Bulguları / Quality Audit Findings (`5. Derlem Denetim & Kalite Kontrol`)
 
-| Kontrol Kategorisi | Etiket | Tespit Edilen Kayıt |
+| Kontrol Kategorisi / Audit Category | Etiket / Tag | Tespit Edilen Kayıt / Count |
 |---|---|---:|
 | **eksik-dosya** | `#kontrol:eksik-dosya` | **148** |
 | **ust-kayitsiz-pdf** | `#kontrol:ust-kayitsiz-pdf` | **95** |
@@ -69,9 +69,9 @@
 | **ocr-gerekli** | `#kontrol:ocr-gerekli` | **17** |
 | **mukerrer-aday** | `#kontrol:mukerrer-aday` | **13** |
 
-## 6. Metin Katmanı Olmayan (OCR Gereken) PDF'ler
+## 6. Metin Katmanı Olmayan (OCR Gereken) PDF'ler / Scanned PDFs Requiring OCR
 
-| Zotero Key | Derlem | Başlık |
+| Zotero Key | Derlem / Corpus | Başlık / Title |
 |---|---|---|
 | `4BGPA7Z2` | `genel-dilbilim` | 28.-ulusal-dilbilim-kurultayi.pdf |
 | `7ZJB8LQ2` | `zazaki-kirmancki` | Grammatik der Zaza-Sprache: Nord-Dialekt (Dersim-Dialekt) |

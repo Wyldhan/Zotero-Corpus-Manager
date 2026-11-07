@@ -1,15 +1,20 @@
-"""Markdown, Excel uyumlu CSV ve JSON Rapor Üretici."""
+"""
+[TR] İki Dilli (TR/EN) Markdown, Excel uyumlu CSV ve JSON Rapor Üretici.
+[EN] Bilingual (TR/EN) Markdown, Excel-compatible CSV, and JSON Report Generator.
+"""
 from __future__ import annotations
 
 import csv
 import io
-import json
 from collections import Counter
 from pathlib import Path
 
 
 def compute_summary_stats(results: dict[int, dict]) -> dict:
-    """Web arayüzü ve raporlar için özet istatistikleri hesaplar."""
+    """
+    [TR] Web arayüzü ve raporlar için 5 boyutlu özet istatistikleri hesaplar.
+    [EN] Computes 5-dimensional summary statistics for the Web UI and reports.
+    """
     total = len(results)
     standalone = sum(1 for r in results.values() if r["itemType"] == "attachment")
     regular = total - standalone
@@ -33,16 +38,20 @@ def compute_summary_stats(results: dict[int, dict]) -> dict:
 
 
 def generate_markdown_report(zdir: Path, results: dict[int, dict]) -> str:
+    """
+    [TR] Kütüphanenin iki dilli (TR / EN) kapsamlı Markdown denetim raporunu üretir.
+    [EN] Generates a comprehensive bilingual (TR / EN) Markdown audit report of the library.
+    """
     stats = compute_summary_stats(results)
     lines = [
-        "# Zotero Kütüphanesi Otomatik Sınıflandırma ve Derlem Denetim Raporu",
+        "# Zotero Kütüphanesi Otomatik Sınıflandırma ve Derlem Denetim Raporu / Zotero Library Classification & Corpus Audit Report",
         "",
-        f"- **Veritabanı Konumu**: `{zdir / 'zotero.sqlite'}`",
-        f"- **Toplam Üst Seviye Kayıt**: **{stats['total_items']:,}** (`{stats['regular_items']:,}` bibliyografik kayıt + `{stats['standalone_pdfs']:,}` üst kaydı olmayan PDF)",
+        f"- **Veritabanı Konumu / Database Path**: `{zdir / 'zotero.sqlite'}`",
+        f"- **Toplam Üst Seviye Kayıt / Total Top-Level Items**: **{stats['total_items']:,}** (`{stats['regular_items']:,}` bibliyografik kayıt / bibliographic items + `{stats['standalone_pdfs']:,}` üst kayıtsız PDF / standalone PDFs)",
         "",
-        "## 1. Hedef Dil ve Derlem Dağılımı (`1. Derlemler & Hedef Diller`)",
+        "## 1. Hedef Dil ve Derlem Dağılımı / Target Language & Corpus Distribution (`1. Derlemler & Hedef Diller`)",
         "",
-        "| Derlem / Hedef Dil Grubu | Etiket | Kayıt Sayısı |",
+        "| Derlem / Target Corpus | Etiket / Tag | Kayıt Sayısı / Count |",
         "|---|---|---:|",
     ]
     for k, v in stats["by_corpus"].items():
@@ -50,9 +59,9 @@ def generate_markdown_report(zdir: Path, results: dict[int, dict]) -> str:
 
     lines.extend([
         "",
-        "## 2. Metin Diline Göre Dağılım (`2. Metin Diline Göre`)",
+        "## 2. Metin Diline Göre Dağılım / Distribution by Document Language (`2. Metin Diline Göre`)",
         "",
-        "| Metin Dili | Etiket | Kayıt Sayısı |",
+        "| Metin Dili / Document Language | Etiket / Tag | Kayıt Sayısı / Count |",
         "|---|---|---:|",
     ])
     for k, v in stats["by_language"].items():
@@ -60,9 +69,9 @@ def generate_markdown_report(zdir: Path, results: dict[int, dict]) -> str:
 
     lines.extend([
         "",
-        "## 3. Eser Türüne Göre Dağılım (`3. Eser Türüne Göre`)",
+        "## 3. Eser Türüne Göre Dağılım / Distribution by Item Type (`3. Eser Türüne Göre`)",
         "",
-        "| Eser Türü | Etiket | Kayıt Sayısı |",
+        "| Eser Türü / Item Type | Etiket / Tag | Kayıt Sayısı / Count |",
         "|---|---|---:|",
     ])
     for k, v in stats["by_type"].items():
@@ -70,9 +79,9 @@ def generate_markdown_report(zdir: Path, results: dict[int, dict]) -> str:
 
     lines.extend([
         "",
-        "## 4. Konu ve Alt Alan Dağılımı (`4. Konu & Alt Alanlara Göre`)",
+        "## 4. Konu ve Alt Alan Dağılımı / Distribution by Research Topic (`4. Konu & Alt Alanlara Göre`)",
         "",
-        "| Konu / Alt Alan | Etiket | Kayıt Sayısı |",
+        "| Konu / Research Topic | Etiket / Tag | Kayıt Sayısı / Count |",
         "|---|---|---:|",
     ])
     for k, v in stats["by_topic"].items():
@@ -80,9 +89,9 @@ def generate_markdown_report(zdir: Path, results: dict[int, dict]) -> str:
 
     lines.extend([
         "",
-        "## 5. Derlem Denetim & Kalite Kontrol Bulguları (`5. Derlem Denetim & Kalite Kontrol`)",
+        "## 5. Derlem Denetim & Kalite Kontrol Bulguları / Quality Audit Findings (`5. Derlem Denetim & Kalite Kontrol`)",
         "",
-        "| Kontrol Kategorisi | Etiket | Tespit Edilen Kayıt |",
+        "| Kontrol Kategorisi / Audit Category | Etiket / Tag | Tespit Edilen Kayıt / Count |",
         "|---|---|---:|",
     ])
     for k, v in stats["by_audit"].items():
@@ -90,9 +99,9 @@ def generate_markdown_report(zdir: Path, results: dict[int, dict]) -> str:
 
     lines.extend([
         "",
-        "## 6. Metin Katmanı Olmayan (OCR Gereken) PDF'ler",
+        "## 6. Metin Katmanı Olmayan (OCR Gereken) PDF'ler / Scanned PDFs Requiring OCR",
         "",
-        "| Zotero Key | Derlem | Başlık |",
+        "| Zotero Key | Derlem / Corpus | Başlık / Title |",
         "|---|---|---|",
     ])
     for r in results.values():
@@ -103,23 +112,28 @@ def generate_markdown_report(zdir: Path, results: dict[int, dict]) -> str:
 
 
 def generate_csv_report(results: dict[int, dict]) -> str:
-    """Excel ile doğrudan açılabilen UTF-8 BOM'lu CSV raporu üretir."""
+    """
+    [TR] Excel ile doğrudan açılabilen UTF-8 BOM'lu iki dilli CSV raporu üretir.
+    [EN] Generates an Excel-compatible UTF-8 with BOM CSV report with bilingual column headers.
+    """
     buf = io.StringIO()
+    # [TR] Microsoft Excel'in Türkçe/Kürtçe karakterleri doğru açması için UTF-8 BOM ekle
+    # [EN] Write UTF-8 BOM so Microsoft Excel opens Turkish/Kurdish characters properly
     buf.write("\ufeff")
     writer = csv.writer(buf)
     writer.writerow([
         "Zotero Key",
-        "Kayıt Türü",
-        "Başlık",
-        "Yazarlar",
-        "Tarih",
+        "Kayıt Türü / Item Type",
+        "Başlık / Title",
+        "Yazarlar / Creators",
+        "Tarih / Date",
         "DOI",
-        "Metin Dili",
-        "ISO Kodu",
-        "Hedef Derlemler",
-        "Eser Türü",
-        "Konular",
-        "Kalite Kontrolleri",
+        "Metin Dili / Language",
+        "ISO Kodu / ISO Code",
+        "Hedef Derlemler / Target Corpora",
+        "Eser Türü / Publication Type",
+        "Konular / Topics",
+        "Kalite Kontrolleri / Quality Audit",
     ])
     for r in results.values():
         writer.writerow([

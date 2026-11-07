@@ -1,4 +1,7 @@
-"""Zotero SQLite veritabanı ve storage tam metin önbelleklerini güvenli (salt-okunur) okur."""
+"""
+[TR] Zotero SQLite veritabanı ve storage tam metin önbelleklerini güvenli (salt-okunur) okur.
+[EN] Safely reads (read-only snapshot) the Zotero SQLite database and storage full-text caches.
+"""
 from __future__ import annotations
 
 import hashlib
@@ -9,13 +12,20 @@ from pathlib import Path
 
 
 def load_library_snapshot(zdir: Path, compute_hashes: bool = False) -> dict[int, dict]:
-    """Zotero açık olsa bile WAL dosyalarıyla birlikte geçici kopya üzerinden tüm kayıtları okur."""
+    """
+    [TR] Zotero açık olsa bile WAL dosyalarıyla birlikte geçici kopya üzerinden tüm kayıtları okur.
+    [EN] Reads all top-level items via a temporary snapshot (including WAL files) even while Zotero is open.
+    """
     db_file = zdir / "zotero.sqlite"
     if not db_file.exists():
-        raise FileNotFoundError(f"Zotero veritabanı bulunamadı: {db_file}")
+        raise FileNotFoundError(
+            f"[TR] Zotero veritabanı bulunamadı / [EN] Zotero database not found: {db_file}"
+        )
 
     tmp_dir = Path(tempfile.mkdtemp(prefix="zotero_mgr_"))
     try:
+        # [TR] Veritabanı kilidini etkilememek için .sqlite, -wal ve -shm dosyalarını geçici dizine kopyala
+        # [EN] Copy .sqlite, -wal, and -shm files to a temp directory to avoid locking the live database
         for ext in ["", "-wal", "-shm"]:
             src = zdir / f"zotero.sqlite{ext}"
             if src.exists():
@@ -25,6 +35,8 @@ def load_library_snapshot(zdir: Path, compute_hashes: bool = False) -> dict[int,
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
 
+        # [TR] 1. Tüm üst seviye kayıtları yükle (bibliyografik kayıtlar + üst kaydı olmayan PDF'ler)
+        # [EN] 1. Load all top-level items (regular bibliographic items + standalone PDF attachments)
         entries: dict[int, dict] = {}
         for r in cur.execute("""
             SELECT i.itemID, i.key, it.typeName, i.dateAdded, i.dateModified
@@ -53,6 +65,8 @@ def load_library_snapshot(zdir: Path, compute_hashes: bool = False) -> dict[int,
                 "notes_count": 0,
             }
 
+        # [TR] 2. Üst veri alanlarını (Başlık, Özet, DOI, Dergi, Tarih, Dil vb.) yükle
+        # [EN] 2. Load metadata fields (Title, Abstract, DOI, Publication, Date, Language, etc.)
         for r in cur.execute("""
             SELECT id.itemID, f.fieldName, idv.value
             FROM itemData id
@@ -62,6 +76,8 @@ def load_library_snapshot(zdir: Path, compute_hashes: bool = False) -> dict[int,
             if r["itemID"] in entries:
                 entries[r["itemID"]]["fields"][r["fieldName"]] = r["value"]
 
+        # [TR] 3. Yazar ve katkıda bulunanları (creators) sıralı yükle
+        # [EN] 3. Load authors and contributors (creators) in order
         for r in cur.execute("""
             SELECT ic.itemID, c.firstName, c.lastName, ct.creatorType
             FROM itemCreators ic
@@ -72,6 +88,8 @@ def load_library_snapshot(zdir: Path, compute_hashes: bool = False) -> dict[int,
             if r["itemID"] in entries:
                 entries[r["itemID"]]["creators"].append((r["creatorType"], r["lastName"] or "", r["firstName"] or ""))
 
+        # [TR] 4. Mevcut koleksiyon üyeliklerini yükle
+        # [EN] 4. Load existing collection memberships
         col_map = {
             r["collectionID"]: r["collectionName"]
             for r in cur.execute("SELECT collectionID, collectionName FROM collections WHERE libraryID=1")
@@ -80,6 +98,8 @@ def load_library_snapshot(zdir: Path, compute_hashes: bool = False) -> dict[int,
             if r["itemID"] in entries and r["collectionID"] in col_map:
                 entries[r["itemID"]]["collections"].append(col_map[r["collectionID"]])
 
+        # [TR] 5. Mevcut etiketleri (tags) yükle
+        # [EN] 5. Load existing item tags
         for r in cur.execute("""
             SELECT itg.itemID, t.name
             FROM itemTags itg
@@ -88,6 +108,8 @@ def load_library_snapshot(zdir: Path, compute_hashes: bool = False) -> dict[int,
             if r["itemID"] in entries:
                 entries[r["itemID"]]["tags"].append(r["name"])
 
+        # [TR] 6. Alt not sayılarını (itemNotes) yükle
+        # [EN] 6. Load child note counts (itemNotes)
         for r in cur.execute("""
             SELECT parentItemID, COUNT(*) as cnt
             FROM itemNotes ino
@@ -98,6 +120,8 @@ def load_library_snapshot(zdir: Path, compute_hashes: bool = False) -> dict[int,
             if r["parentItemID"] in entries:
                 entries[r["parentItemID"]]["notes_count"] = r["cnt"]
 
+        # [TR] 7. Ek dosyaları (PDF vb.), fiziksel dosya durumunu, SHA-256 özetini ve tam metin önbelleğini yükle
+        # [EN] 7. Load attachments (PDFs, etc.), physical file status, SHA-256 hash, and full-text cache sample
         for r in cur.execute("""
             SELECT ia.itemID as attID, ia.parentItemID, ia.linkMode, ia.contentType, ia.path,
                    i.key as attKey, ft.indexedPages, ft.totalPages, ft.indexedChars,

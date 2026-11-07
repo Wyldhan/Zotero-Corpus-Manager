@@ -1,52 +1,84 @@
-# 📖 Adım Adım Kullanım Kılavuzu (Yazılım Bilgisi Gerektirmez)
+# 📖 Adım Adım Kullanım Kılavuzu / Step-by-Step User Guide
 
-Bu kılavuz, hiçbir kodlama veya komut satırı bilgisi olmadan **Zotero Derlem & Otomatik Sınıflandırma Yöneticisi**'ni nasıl kullanacağınızı anlatır.
-
----
-
-## 1. İlk Hazırlık (Sadece Bir Kez Yapılır)
-
-1. Bu projeyi GitHub sayfasındaki yeşil **`<> Code`** düğmesine tıklayıp **`Download ZIP`** diyerek bilgisayarınıza indirin ve ZIP dosyasını bir klasöre çıkartın.
-2. Bilgisayarınızda **Python 3** kurulu değilse [python.org/downloads](https://www.python.org/downloads/) adresinden indirip kurun *(Kurulum ekranında en alttaki **"Add Python to PATH"** kutucuğunu işaretlemeyi unutmayın).*
-   - **Ekstra hiçbir kütüphane (`pip install` vb.) kurmanıza gerek yoktur!** Araç tamamen standart Python ile çalışır.
+<p align="center">
+  <strong><a href="#-türkçe-kullanım-kılavuzu">🇹🇷 Türkçe Kullanım Kılavuzu</a></strong> &nbsp;|&nbsp;
+  <strong><a href="#-english-user-guide">🇬🇧 English User Guide</a></strong>
+</p>
 
 ---
 
-## 2. Programı Başlatma (Çift Tıkla Çalıştırma)
+## 🇹🇷 Türkçe Kullanım Kılavuzu
 
-- **Windows Kullanıcıları:** Klasörün içindeki **`Baslat.bat`** dosyasına çift tıklayın.
-- **Mac / Linux Kullanıcıları:** Klasörün içindeki **`baslat.sh`** dosyasına çift tıklayın (veya çalıştırın).
+Bu kılavuz, **hiçbir yazılım veya programlama bilgisi olmayan** araştırmacıların Zotero kütüphanelerini birkaç tıklamayla nasıl sınıflandırabileceğini ve mükerrer (çift) dosyaları nasıl temizleyebileceğini anlatır.
 
-Program Zotero klasörünüzü (`D:\Zotero`, `C:\Users\Adınız\Zotero` vb.) **otomatik olarak bulur** ve internet tarayıcınızda **Görsel Yönetim Panelini (`http://127.0.0.1:8765`)** açar.
+### 1. Hazırlık: Bilgisayarınızda Python Var mı?
+Bu araç çalışmak için yalnızca standart **Python 3** yorumlayıcısına ihtiyaç duyar (ekstra hiçbir kütüphane kurulumu gerekmez).
+- Eğer bilgisayarınızda Python yüklü değilse [python.org/downloads](https://www.python.org/downloads/) adresinden indirip kurarken en alttaki **"Add python.exe to PATH"** kutucuğunu işaretlemeniz yeterlidir.
+
+### 2. Programı Başlatma
+1. **Windows Kullanıcıları:** Klasörün içindeki **[`Baslat.bat`](file:///D:/Claude/Projects/Zotero-Derlem-Yoneticisi/Baslat.bat)** dosyasına **çift tıklayın**.
+2. **macOS / Linux Kullanıcıları:** Terminalde `./baslat.sh` komutunu çalıştırın.
+3. Saniyeler içinde internet tarayıcınızda (Chrome, Edge, Firefox, Safari) **`http://127.0.0.1:8765`** adresinde görsel kontrol paneliniz açılacaktır. *(Program tamamen kendi bilgisayarınızda çalışır, verileriniz internete gönderilmez.)*
+4. Sağ üst köşedeki **`🇹🇷 TR | 🇬🇧 EN`** düğmesine tıklayarak arayüz dilini istediğiniz an Türkçe veya İngilizce yapabilirsiniz.
+
+### 3. Sekmelerin Kullanımı
+
+#### 🔹 Sekme 1: Genel Bakış & Otomatik Sınıflandırma
+- Sayfa açıldığında Zotero klasörünüz (ör. `D:\Zotero` veya `C:\Users\Adınız\Zotero`) otomatik olarak bulunur ve taranır.
+- **"✅ Sınıflandırmayı Şimdi Zotero'ya Uygula"** düğmesine bastığınızda:
+  1. Zotero açıksa güvenli şekilde kapatılır.
+  2. Veritabanınızın tam yedeği alınır.
+  3. 5 ana kategori altında 52 koleksiyon ve alt-koleksiyon oluşturulur, tüm eserler ilgili koleksiyonlara yerleştirilir ve hatalı dil kodları (`zza`, `kmr`, `ckb`, `tr`, `en`) düzeltilir.
+  4. Zotero otomatik olarak yeniden başlatılır.
+
+#### 🔹 Sekme 2: Akıllı Mükerrer (Duplicate) Birleştirici
+- **"🔍 Mükerrerleri ve PDF Kopyalarını Analiz Et"** düğmesine tıkladığınızda kütüphanenizdeki tüm PDF'lerin içerik özetleri (SHA-256), DOI numaraları ve başlıkları karşılaştırılır.
+- Tabloda her mükerrer grubu için **Korunacak Ana Kayıt (En Kapsamlı Kaynakça)** yeşil etiketle, birleştirilip silinecek kopyalar sarı etiketle gösterilir.
+- **"✨ Tüm Mükerrerleri Birleştir ve Tek Dosyaya İndir"** düğmesine bastığınızda:
+  - Kopyalardaki eksik künye bilgileri (cilt, sayı, sayfa, DOI, özet, notlar) ana kayda aktarılır.
+  - En sağlam **tek PDF dosyası** ana kayda bağlanır.
+  - Fazlalık kayıtlar ve kopya PDF klasörleri silinerek disk alanı kazanılır.
+
+#### 🔹 Sekme 3, 4 ve 5: Kayıt Gezgini, Kurallar ve Yedekler
+- **Kayıt Gezgini:** Kütüphanenizdeki tüm kayıtları `#derlem:zazaki-kirmancki`, `#tur:sozluk`, `#kontrol:ocr-gerekli` gibi etiketlerle anında filtreleyebilirsiniz.
+- **Kural & Derlem Ayarları:** [`config/default_rules.json`](file:///D:/Claude/Projects/Zotero-Derlem-Yoneticisi/config/default_rules.json) dosyasındaki anahtar kelimeleri doğrudan tarayıcı üzerinden düzenleyip kaydedebilirsiniz.
+- **Yedekleme & Geri Yükleme:** Alınan tüm `.bak` yedeklerini görebilir, **"⏪ Bu Yedeğe Geri Dön"** düğmesiyle istediğiniz tarihteki duruma tek tıkla dönebilirsiniz.
 
 ---
 
-## 3. Görsel Yönetim Panelinde Neler Yapabilirsiniz?
+## 🇬🇧 English User Guide
 
-### Sekme 1: Genel Bakış & Otomatik Sınıflandırma
-1. Sayfa açıldığında kütüphaneniz otomatik taranır ve üst kısımda toplam eser sayınız, bağımsız PDF sayınız ve derlem dağılımınız grafiklerle gösterilir.
-2. **`✅ Sınıflandırmayı Şimdi Zotero'ya Uygula`** düğmesine tıkladığınızda:
-   - Zotero açıksa güvenli bir şekilde kapatılır,
-   - Veritabanınızın otomatik yedeği alınır,
-   - Zotero'da 5 ana başlık altında (`1. Derlemler & Hedef Diller`, `2. Metin Diline Göre`, `3. Eser Türüne Göre`, `4. Konu & Alt Alanlara Göre`, `5. Derlem Denetim & Kalite Kontrol`) koleksiyonlar oluşturulur ve eserleriniz ilgili klasörlere yerleştirilir,
-   - Her esere `#dil:...`, `#derlem:...`, `#tur:...`, `#konu:...` etiketleri eklenir,
-   - Yanlışlıkla İngilizce (`en`) görünürken gerçekte Türkçe, Kirmanckî (Zazakî), Kurmancî, Soranî veya Almanca olan kayıtların `Dil (Language)` alanı düzeltilir,
-   - Zotero otomatik olarak yeniden açılır.
+This guide explains how researchers with **zero programming knowledge** can automatically classify their Zotero libraries and consolidate duplicate PDF files in just a few clicks.
 
-### Sekme 2: Akıllı Mükerrer Birleştirici (Tek Dosyaya İndirme)
-1. **`🔍 Mükerrerleri ve PDF Kopyalarını Analiz Et`** düğmesine tıklayın.
-2. Araç, tüm PDF'lerinizin içerik özetini (SHA-256), DOI numaralarını ve künye başlıklarını karşılaştırır.
-3. Tabloda her mükerrer grubu için **Korunacak Ana Kayıt (En Kapsamlı Kaynakça)** yeşil rozetle, birleştirilip silinecek kopyalar sarı rozetle gösterilir.
-4. **`✨ Tüm Mükerrerleri Birleştir ve Tek Dosyaya İndir`** düğmesine tıkladığınızda:
-   - Kopyalardaki eksik künye bilgileri (DOI, özet, cilt, sayı, sayfa, ISBN) ve notlar en kapsamlı ana kayda aktarılır,
-   - En sağlam/okunabilir tek PDF dosyası ana kayda bağlanır (önceden başıboş duran PDF'ler ilgili künyenin alt eki olur),
-   - Fazlalık PDF dosyaları ve mükerrer kayıtlar silinerek yüzlerce MB disk alanı boşaltılır.
+### 1. Prerequisite: Python 3
+This tool uses only the built-in Python 3 Standard Library (no external packages or `pip install` needed).
+- If Python is not installed on your computer, download it from [python.org/downloads](https://www.python.org/downloads/) and check **"Add python.exe to PATH"** during installation.
 
-### Sekme 3: Kayıt Gezgini & Excel Raporu
-- Üst bardaki **`📊 Excel (CSV) İndir`** veya **`📄 Markdown Rapor İndir`** düğmeleriyle tüm kütüphanenizin sınıflandırma dökümünü bilgisayarınıza indirebilirsiniz.
+### 2. Launching the Application
+1. **Windows Users:** Double-click **[`Baslat.bat`](file:///D:/Claude/Projects/Zotero-Derlem-Yoneticisi/Baslat.bat)**.
+2. **macOS / Linux Users:** Run `./baslat.sh` in your terminal.
+3. Your default web browser will automatically open **`http://127.0.0.1:8765`**. *(Everything runs 100% locally on your machine; no data ever leaves your computer.)*
+4. Click the **`🇹🇷 TR | 🇬🇧 EN`** button in the top-right header at any time to switch the interface between Turkish and English.
 
-### Sekme 4: Kural & Derlem Ayarları
-- Kendi çalışma alanınıza özel yeni bir derlem veya konu başlığı eklemek isterseniz **4. Kural & Derlem Ayarları** sekmesinden anahtar kelimeleri düzenleyip **`💾 Kuralları Kaydet ve Yeniden Tara`** düğmesine basmanız yeterlidir.
+### 3. Using the Dashboard Tabs
 
-### Sekme 5: Yedekleme & Geri Yükleme
-- Yapılan her işlemden önce otomatik `.bak` yedeği alınır. İstediğiniz zaman **5. Yedekleme & Geri Yükleme** sekmesinden **`⏪ Bu Yedeğe Geri Dön`** düğmesine tıklayarak tek tıkla önceki duruma dönebilirsiniz.
+#### 🔹 Tab 1: Overview & Automatic Classification
+- On startup, your Zotero data directory (`D:\Zotero`, `~/Zotero`, etc.) is auto-detected and scanned read-only.
+- Clicking **"✅ Apply Classification to Zotero Now"**:
+  1. Gracefully closes Zotero if it is currently running.
+  2. Creates a timestamped `.bak` backup of `zotero.sqlite`.
+  3. Builds the 52-collection hierarchy across 5 dimensions (Corpus, Document Language, Publication Type, Research Topic, Quality Audit), adds structured tags, and fixes incorrect ISO language codes (`zza`, `kmr`, `ckb`, `tr`, `en`).
+  4. Automatically restarts Zotero.
+
+#### 🔹 Tab 2: Smart Deduplicator
+- Click **"🔍 Analyze Duplicates & Redundant PDFs"** to compare SHA-256 file hashes, DOIs, and normalized titles/authors across your library.
+- The table displays the **Winning Master Record (Most Comprehensive Bibliography)** in green alongside the duplicate copies to be merged and removed.
+- Click **"✨ Merge All Duplicates & Consolidate to Single File"** to:
+  - Merge missing metadata fields (volume, issue, pages, DOI, abstract, notes, tags, collections) into the winning record.
+  - Link the **single best physical PDF file** (preserving annotations) to the winning record.
+  - Delete redundant duplicate records and duplicate `storage/<KEY>` folders to free disk space.
+
+#### 🔹 Tabs 3, 4, and 5: Item Explorer, Rules & Backups
+- **Item Explorer:** Instantly filter your library by title, author, or auto-tags such as `#derlem:zazaki-kirmancki`, `#tur:sozluk`, or `#kontrol:ocr-gerekli`.
+- **Rules & Corpus Settings:** Customize [`config/default_rules.json`](file:///D:/Claude/Projects/Zotero-Derlem-Yoneticisi/config/default_rules.json) directly inside the browser and rescan.
+- **Backup & Restore:** View all timestamped `zotero.sqlite.*.bak` backups and restore any backup with a single click on **"⏪ Restore This Backup"**.

@@ -1,4 +1,12 @@
-"""5 Boyutlu Zotero Otomatik Sınıflandırma ve Koleksiyon Planlama Motoru."""
+"""
+[TR] 5 Boyutlu Zotero Otomatik Sınıflandırma ve Koleksiyon Planlama Motoru.
+     Her kaydı; (1) Metin Dili, (2) Hedef Derlem, (3) Eser Türü,
+     (4) Konu/Alt Alan ve (5) Teknik Kalite Kontrol boyutlarında analiz eder.
+[EN] 5-Dimensional Zotero Automatic Classification and Collection Planning Engine.
+     Analyzes every record across 5 dimensions: (1) Document Language,
+     (2) Target Corpus, (3) Item Type, (4) Research Topic/Subfield, and
+     (5) Technical Quality Audit.
+"""
 from __future__ import annotations
 
 import json
@@ -6,19 +14,34 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
+# [TR] Varsayılan sınıflandırma kuralları JSON dosyasının yolu
+# [EN] Path to the default classification rules JSON file
 DEFAULT_RULES_PATH = Path(__file__).resolve().parent.parent / "config" / "default_rules.json"
 
+# [TR] Dil ve alfabe tespiti için derlenmiş düzenli ifadeler (Regex)
+# [EN] Compiled regular expressions (Regex) for language and script detection
 RE_TR_CHARS = re.compile(r"[ğĞşŞıİ]")
 RE_AR_SCRIPT = re.compile(r"[\u0600-\u06FF]")
 RE_SORANI_CHARS = re.compile(r"[ڵڕێۆەڤگچپژ]")
+
+# [TR] Tekrar çalıştırılabilirlik (idempotency) için yoksayılacak otomatik etiket önekleri
+# [EN] Auto-tag prefixes to ignore when building text blobs to guarantee idempotency
 AUTO_TAG_PREFIXES = ("#dil:", "#derlem:", "#tur:", "#konu:", "#kontrol:")
 
 
 def clean_text(s: str) -> str:
+    """
+    [TR] PDF veya OCR kaynaklı bozuk Türkçe karakterleri (Ġ->İ, ġ->ş) ve alt çizgileri temizler.
+    [EN] Cleans corrupted Turkish characters (Ġ->İ, ġ->ş) from PDFs/OCR and replaces underscores.
+    """
     return (s or "").replace("Ġ", "İ").replace("ġ", "ş").replace("_", " ")
 
 
 def normalize_title_key(s: str) -> str:
+    """
+    [TR] Mükerrer ön kontrolü için başlığı küçük harfe çevirir, noktalama ve libgen eklerini siler.
+    [EN] Normalizes a title to lowercase and strips punctuation/libgen suffixes for duplicate pre-screening.
+    """
     s = clean_text(s).lower()
     s = re.sub(r"\[#\d+\]-\d+", "", s)
     s = re.sub(r"\(\d+\)$", "", s)
@@ -28,11 +51,19 @@ def normalize_title_key(s: str) -> str:
 
 
 def load_rules(rules_path: Path | None = None) -> dict:
+    """
+    [TR] Sınıflandırma kurallarını JSON dosyasından yükler.
+    [EN] Loads classification rules from the JSON configuration file.
+    """
     p = rules_path or DEFAULT_RULES_PATH
     return json.loads(p.read_text(encoding="utf-8"))
 
 
 def _compile_kw_list(keywords: list[str]) -> re.Pattern | None:
+    """
+    [TR] Anahtar kelime listesini kelime sınırlarına duyarlı tek bir Regex desenine dönüştürür.
+    [EN] Compiles a list of keywords into a single word-boundary-aware Regex pattern.
+    """
     if not keywords:
         return None
     joined = "|".join(keywords)
@@ -40,10 +71,15 @@ def _compile_kw_list(keywords: list[str]) -> re.Pattern | None:
 
 
 def classify_library(entries: dict[int, dict], rules: dict | None = None) -> dict[int, dict]:
-    """Tüm kütüphane kayıtlarını 5 boyutta (dil, derlem, tür, konu, kontrol) sınıflandırır."""
+    """
+    [TR] Tüm kütüphane kayıtlarını 5 boyutta (dil, derlem, tür, konu, kontrol) sınıflandırır.
+    [EN] Classifies all library items across 5 dimensions (language, corpus, type, topic, audit).
+    """
     if rules is None:
         rules = load_rules()
 
+    # [TR] Dil, derlem ve konu anahtar kelimelerini hızlı arama için derle
+    # [EN] Compile language, corpus, and topic keywords for fast matching
     lang_compiled = {}
     iso_map = {}
     for lcfg in rules.get("languages", []):
@@ -62,7 +98,8 @@ def classify_library(entries: dict[int, dict], rules: dict | None = None) -> dic
         if tcfg.get("keywords")
     }
 
-    # Mükerrer ön kontrolü (başlık ve dosya boyutu tabanlı)
+    # [TR] Mükerrer ön kontrolü (başlık ve dosya boyutu tabanlı hızlı gruplama)
+    # [EN] Duplicate pre-screening (fast grouping based on normalized title and file size)
     title_groups: dict[str, list[int]] = defaultdict(list)
     size_groups: dict[int, list[int]] = defaultdict(list)
     for iid, e in entries.items():
@@ -102,12 +139,16 @@ def classify_library(entries: dict[int, dict], rules: dict | None = None) -> dic
         lang_field = (f.get("language", "") or "").strip().lower()
         ft_samples = clean_text(" ".join(a.get("ft_sample", "")[:2500] for a in e["attachments"]))
 
-        # Kendi ürettiğimiz otomatik etiketleri (#derlem:... vb.) metin havuzuna dahil etme (Idempotency)
+        # [TR] Kendi ürettiğimiz otomatik etiketleri (#derlem:... vb.) metin havuzuna dahil etme (Idempotency)
+        # [EN] Exclude previously generated auto-tags (#derlem:... etc.) from the text pool (Idempotency)
         user_tags = [t for t in e["tags"] if not t.startswith(AUTO_TAG_PREFIXES)]
         meta_blob = f"{title} {abstract} {pub} {' '.join(user_tags)}"
         full_blob = f"{meta_blob} {ft_samples}"
 
-        # 1. Metin Dili (#dil:...)
+        # ======================================================================
+        # 1. [TR] Metin Dili Tespiti (#dil:...)
+        #    [EN] Document Language Detection (#dil:...)
+        # ======================================================================
         ar_chars_title = len(RE_AR_SCRIPT.findall(title + " " + abstract))
         ar_chars_full = len(RE_AR_SCRIPT.findall(full_blob))
         if ar_chars_title > 8 or ar_chars_full > 120:
@@ -139,7 +180,10 @@ def classify_library(entries: dict[int, dict], rules: dict | None = None) -> dic
         else:
             doc_lang = "ingilizce"
 
-        # 2. Hedef Dil / Derlem (#derlem:...)
+        # ======================================================================
+        # 2. [TR] Hedef Dil / Derlem Tespiti (#derlem:...)
+        #    [EN] Target Language / Corpus Detection (#derlem:...)
+        # ======================================================================
         derlem = []
         if (corpus_compiled.get("zazaki-kirmancki") and corpus_compiled["zazaki-kirmancki"].search(meta_blob)) or doc_lang == "kirmancki" or "Zazakî-Gramer" in e["collections"]:
             derlem.append("zazaki-kirmancki")
@@ -154,6 +198,8 @@ def classify_library(entries: dict[int, dict], rules: dict | None = None) -> dic
         if corpus_compiled.get("turkce-turkoloji") and corpus_compiled["turkce-turkoloji"].search(meta_blob) and not derlem:
             derlem.append("turkce-turkoloji")
 
+        # [TR] Üst veride derlem bulunamadıysa PDF tam metin önbelleğinin ilk 1500 karakterine bak
+        # [EN] If no corpus matched in metadata, fallback to checking the first 1500 chars of PDF full-text
         if not derlem:
             if corpus_compiled.get("zazaki-kirmancki") and corpus_compiled["zazaki-kirmancki"].search(ft_samples[:1500]):
                 derlem.append("zazaki-kirmancki")
@@ -164,7 +210,10 @@ def classify_library(entries: dict[int, dict], rules: dict | None = None) -> dic
             else:
                 derlem.append("genel-dilbilim")
 
-        # 3. Eser Türü (#tur:...)
+        # ======================================================================
+        # 3. [TR] Eser Türü Tespiti (#tur:...)
+        #    [EN] Item / Publication Type Detection (#tur:...)
+        # ======================================================================
         itype = e["itemType"]
         if re.search(r"\b(sözlük\w*|sözlüğü|ferheng\w*|dictionary|lexicon|glossary|îdyom\w*|deyimler)\b", title, re.I):
             tur = "sozluk"
@@ -185,7 +234,10 @@ def classify_library(entries: dict[int, dict], rules: dict | None = None) -> dic
         else:
             tur = "makale"
 
-        # 4. Konu / Alt Alan (#konu:...)
+        # ======================================================================
+        # 4. [TR] Konu ve Alt Alan Tespiti (#konu:...)
+        #    [EN] Research Topic & Subfield Detection (#konu:...)
+        # ======================================================================
         konular = []
         for tid, pat in topic_compiled.items():
             if pat and pat.search(meta_blob):
@@ -203,7 +255,10 @@ def classify_library(entries: dict[int, dict], rules: dict | None = None) -> dic
             else:
                 konular.append("genel-dilbilim-kuram")
 
-        # 5. Teknik / Derlem Kontrol (#kontrol:...)
+        # ======================================================================
+        # 5. [TR] Teknik & Derlem Kalite Kontrol (#kontrol:...)
+        #    [EN] Technical & Corpus Quality Audit (#kontrol:...)
+        # ======================================================================
         kontroller = []
         if iid in dup_iids:
             kontroller.append("mukerrer-aday")

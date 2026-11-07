@@ -1,4 +1,7 @@
-"""Zotero veri dizinini, yürütülebilir dosyasını ve çalışma durumunu otomatik tespit eder."""
+"""
+[TR] Zotero veri dizinini, yürütülebilir dosyasını ve çalışma durumunu otomatik tespit eder.
+[EN] Automatically detects the Zotero data directory, executable binary, and running process state.
+"""
 from __future__ import annotations
 
 import os
@@ -11,7 +14,10 @@ from pathlib import Path
 
 
 def find_zotero_data_dir(custom_path: str | Path | None = None) -> Path:
-    """Kullanıcının Zotero veri dizinini (zotero.sqlite'ın bulunduğu klasör) otomatik bulur."""
+    """
+    [TR] Kullanıcının Zotero veri dizinini (zotero.sqlite'ın bulunduğu klasör) otomatik bulur.
+    [EN] Automatically locates the user's Zotero data directory (folder containing zotero.sqlite).
+    """
     if custom_path:
         p = Path(custom_path).expanduser().resolve()
         if (p / "zotero.sqlite").exists():
@@ -23,7 +29,8 @@ def find_zotero_data_dir(custom_path: str | Path | None = None) -> Path:
         if (p / "zotero.sqlite").exists():
             return p
 
-    # 1. Zotero profilindeki prefs.js dosyasından özel veri dizinini (extensions.zotero.dataDir) oku
+    # [TR] 1. Zotero profilindeki prefs.js dosyasından özel veri dizinini (extensions.zotero.dataDir) oku
+    # [EN] 1. Read custom data directory (extensions.zotero.dataDir) from Zotero profile's prefs.js
     home = Path.home()
     profile_roots = [
         home / "AppData" / "Roaming" / "Zotero" / "Zotero" / "Profiles",
@@ -44,7 +51,8 @@ def find_zotero_data_dir(custom_path: str | Path | None = None) -> Path:
                 except Exception:
                     pass
 
-    # 2. Yaygın varsayılan dizinleri kontrol et
+    # [TR] 2. Yaygın varsayılan dizinleri kontrol et
+    # [EN] 2. Check common default directories across drives and user home
     candidates = [
         Path(r"D:\Zotero"),
         Path(r"C:\Zotero"),
@@ -59,7 +67,10 @@ def find_zotero_data_dir(custom_path: str | Path | None = None) -> Path:
 
 
 def find_zotero_executable() -> Path | None:
-    """İşletim sistemine göre Zotero.exe / Zotero.app yolunu bulur."""
+    """
+    [TR] İşletim sistemine göre Zotero.exe / Zotero.app yolunu bulur.
+    [EN] Locates the Zotero executable binary based on the current operating system.
+    """
     sys_name = platform.system().lower()
     if sys_name == "windows":
         candidates = [
@@ -83,8 +94,12 @@ def find_zotero_executable() -> Path | None:
 
 
 def is_zotero_running() -> bool:
-    """Zotero'nun şu anda açık olup olmadığını kontrol eder."""
-    # Önce yerel port 23119 kontrolü
+    """
+    [TR] Zotero'nun şu anda açık olup olmadığını kontrol eder (Port 23119 ve süreç kontrolü).
+    [EN] Checks whether Zotero is currently running (via local port 23119 and OS process table).
+    """
+    # [TR] Önce Zotero yerel sunucu portu 23119 kontrolü
+    # [EN] First check Zotero local HTTP connector port 23119
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(0.35)
     try:
@@ -108,7 +123,10 @@ def is_zotero_running() -> bool:
 
 
 def stop_zotero_gracefully(timeout_sec: float = 10.0) -> bool:
-    """Zotero açıksa veritabanı kilidini güvenli şekilde bırakması için kapatır."""
+    """
+    [TR] Zotero açıksa veritabanı kilidini güvenli şekilde bırakması için kapatır.
+    [EN] Gracefully closes Zotero if running so SQLite database locks and WAL files are flushed.
+    """
     if not is_zotero_running():
         return True
     sys_name = platform.system().lower()
@@ -124,6 +142,8 @@ def stop_zotero_gracefully(timeout_sec: float = 10.0) -> bool:
             return True
         time.sleep(0.4)
 
+    # [TR] Zaman aşımında zorla kapatma (Yedek koruma)
+    # [EN] Force kill on timeout (Fallback protection)
     if sys_name == "windows":
         subprocess.run(["taskkill", "/F", "/IM", "zotero.exe"], check=False, capture_output=True)
     else:
@@ -133,7 +153,10 @@ def stop_zotero_gracefully(timeout_sec: float = 10.0) -> bool:
 
 
 def start_zotero() -> bool:
-    """Zotero'yu yeniden başlatır."""
+    """
+    [TR] Zotero'yu arka planda yeniden başlatır.
+    [EN] Relaunches the Zotero desktop application in the background.
+    """
     exe = find_zotero_executable()
     if exe and exe.exists():
         try:

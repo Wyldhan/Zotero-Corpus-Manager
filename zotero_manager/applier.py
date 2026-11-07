@@ -1,4 +1,11 @@
-"""Zotero Veritabanı Yedekleme, Geri Yükleme ve Sınıflandırma Uygulama Motoru."""
+"""
+[TR] Zotero Veritabanı Yedekleme, Geri Yükleme ve Sınıflandırma Uygulama Motoru.
+     Her yazma işleminden önce otomatik yedek alır, 52 koleksiyonluk hiyerarşiyi kurar,
+     etiketleri (#dil:, #derlem:, #tur:, #konu:, #kontrol:) işler ve hatalı dil kodlarını düzeltir.
+[EN] Zotero Database Backup, Restore, and Classification Application Engine.
+     Automatically creates a backup before every write operation, builds the 52-collection
+     hierarchy, inserts structured tags, and fixes incorrect ISO 639 language codes.
+"""
 from __future__ import annotations
 
 import random
@@ -9,10 +16,16 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+# [TR] Zotero'nun 8 karakterli benzersiz anahtar (key) alfabesi
+# [EN] Zotero's 8-character unique key alphabet (base32 without 0, 1, O, U)
 ZOTERO_KEY_CHARS = "23456789ABCDEFGHIJKLMNPQRSTUVWXYZ"
 
 
 def gen_zotero_key(existing: set[str]) -> str:
+    """
+    [TR] Mevcut anahtarlarla çakışmayan 8 karakterli yeni bir Zotero anahtarı üretir.
+    [EN] Generates a new unique 8-character Zotero key that does not collide with existing keys.
+    """
     while True:
         k = "".join(random.choice(ZOTERO_KEY_CHARS) for _ in range(8))
         if k not in existing:
@@ -21,7 +34,10 @@ def gen_zotero_key(existing: set[str]) -> str:
 
 
 def create_backup(zdir: Path, label: str = "backup", backup_dir: Path | None = None) -> Path:
-    """Zotero veritabanının tarih-saat damgalı tam yedeğini alır."""
+    """
+    [TR] Zotero veritabanının tarih-saat damgalı tam yedeğini (.bak) alır.
+    [EN] Creates a timestamped full backup (.bak) of the Zotero SQLite database.
+    """
     db_path = zdir / "zotero.sqlite"
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     target_dir = backup_dir or zdir
@@ -32,7 +48,10 @@ def create_backup(zdir: Path, label: str = "backup", backup_dir: Path | None = N
 
 
 def list_backups(zdir: Path, backup_dir: Path | None = None) -> list[dict]:
-    """Mevcut veritabanı yedeklerini listeler."""
+    """
+    [TR] Mevcut veritabanı yedeklerini en yeniden en eskiye doğru listeler.
+    [EN] Lists available database backups sorted from newest to oldest.
+    """
     dirs = [zdir]
     if backup_dir and backup_dir != zdir and backup_dir.exists():
         dirs.append(backup_dir)
@@ -56,10 +75,15 @@ def list_backups(zdir: Path, backup_dir: Path | None = None) -> list[dict]:
 
 
 def restore_backup(zdir: Path, backup_path: str | Path) -> Path:
-    """Seçilen yedek dosyasını aktif zotero.sqlite olarak geri yükler."""
+    """
+    [TR] Seçilen yedek dosyasını aktif zotero.sqlite olarak geri yükler (öncesinde mevcut durumu yedekler).
+    [EN] Restores the selected backup file as the active zotero.sqlite (backing up current state first).
+    """
     src = Path(backup_path).resolve()
     if not src.exists():
-        raise FileNotFoundError(f"Yedek dosyası bulunamadı: {src}")
+        raise FileNotFoundError(
+            f"[TR] Yedek dosyası bulunamadı / [EN] Backup file not found: {src}"
+        )
     db_path = zdir / "zotero.sqlite"
     create_backup(zdir, label="before_restore")
     for ext in ["-wal", "-shm"]:
@@ -74,7 +98,10 @@ def build_collection_plan(
     entries: dict[int, dict],
     results: dict[int, dict],
 ) -> tuple[list[tuple[str, str | None]], dict[tuple[str, str | None], list[int]]]:
-    """Koleksiyon ağacını ve her koleksiyona eklenecek itemID listesini oluşturur."""
+    """
+    [TR] Koleksiyon ağacını ve her koleksiyona eklenecek itemID listesini oluşturur.
+    [EN] Builds the collection tree definition and the mapping of collection -> itemID list.
+    """
     col_defs: list[tuple[str, str | None]] = [
         ("Makaleler", None),
         ("Rojname u kovargeri", "Makaleler"),
@@ -212,6 +239,8 @@ def build_collection_plan(
             if c in kontrol_col:
                 plan[kontrol_col[c]].append(iid)
 
+        # [TR] Kullanıcının mevcut özel araştırma koleksiyonlarını da otomatik besle
+        # [EN] Automatically populate user's specialized research collections as well
         is_kurdish_or_iranian = any(
             d in ("zazaki-kirmancki", "kurmanci", "sorani-gorani", "kurdoloji-genel", "irani-diller")
             for d in r["derlem"]
@@ -262,7 +291,12 @@ def apply_classification_sqlite(
     fix_languages: bool = True,
     backup_dir: Path | None = None,
 ) -> dict:
-    """Sınıflandırma sonuçlarını doğrudan Zotero SQLite veritabanına yazar."""
+    """
+    [TR] Sınıflandırma sonuçlarını doğrudan Zotero SQLite veritabanına yazar.
+         İşlem öncesi otomatik olarak '.pre-classify_*.bak' yedeği alır.
+    [EN] Writes classification results directly into the Zotero SQLite database.
+         Automatically creates a '.pre-classify_*.bak' backup prior to execution.
+    """
     db_path = zdir / "zotero.sqlite"
     bak_file = create_backup(zdir, label="pre-classify", backup_dir=backup_dir)
 
@@ -272,6 +306,8 @@ def apply_classification_sqlite(
 
     existing_keys = {r[0] for r in cur.execute("SELECT key FROM items UNION SELECT key FROM collections")}
 
+    # 1. [TR] Koleksiyonları oluştur ve kayıtları ilgili koleksiyonlara bağla
+    #    [EN] Create collections and link items to their respective collections
     created_cols = 0
     added_col_items = 0
     if apply_collections:
@@ -316,6 +352,8 @@ def apply_classification_sqlite(
                     added_col_items += 1
             cur.execute("UPDATE collections SET clientDateModified=?, synced=0 WHERE collectionID=?", (now_str, cid))
 
+    # 2. [TR] Yapılandırılmış etiketleri (#dil:, #derlem:, #tur:, #konu:, #kontrol:) ekle
+    #    [EN] Insert structured tags (#dil:, #derlem:, #tur:, #konu:, #kontrol:)
     added_tags = 0
     if apply_tags:
         tag_id_map = {r[1]: r[0] for r in cur.execute("SELECT tagID, name FROM tags")}
@@ -329,6 +367,8 @@ def apply_classification_sqlite(
                 cur.execute("INSERT OR IGNORE INTO itemTags (itemID, tagID, type) VALUES (?, ?, 0)", (iid, tid))
                 added_tags += cur.rowcount
 
+    # 3. [TR] Boş veya hatalı ('en' yazılıp TR/ZZA/KMR olan) dil kodlarını ISO 639-1/3 ile düzelt
+    #    [EN] Fix empty or wrong ('en' on TR/ZZA/KMR items) language fields with ISO 639-1/3 codes
     fixed_langs = 0
     if fix_languages:
         lang_field_id = cur.execute("SELECT fieldID FROM fields WHERE fieldName='language'").fetchone()[0]

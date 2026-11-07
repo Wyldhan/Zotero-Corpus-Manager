@@ -1,108 +1,137 @@
-# 📚 Zotero Derlem & Otomatik Sınıflandırma Yöneticisi
+# 📚 Zotero Derlem ve Otomatik Sınıflandırma Yöneticisi / Zotero Corpus & Automatic Classification Manager
 
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Sıfır Bağımlılık](https://img.shields.io/badge/Ba%C4%9F%C4%B1ml%C4%B1l%C4%B1k-S%C4%B1f%C4%B1r%20(Stdlib)-brightgreen.svg)](#)
-[![Lisans: MIT](https://img.shields.io/badge/Lisans-MIT-yellow.svg)](LICENSE)
+<p align="center">
+  <strong><a href="#-türkçe-dokümantasyon">🇹🇷 Türkçe Dokümantasyon</a></strong> &nbsp;|&nbsp;
+  <strong><a href="#-english-documentation">🇬🇧 English Documentation</a></strong>
+</p>
 
-**Zotero Derlem & Otomatik Sınıflandırma Yöneticisi**, özellikle dilbilim, Kürdoloji (Zazakî/Kirmanckî, Kurmancî, Soranî, Goranî), İrani diller, Türkoloji ve doğal dil işleme (NLP) araştırmacıları için geliştirilmiş; **hiçbir yazılım veya komut satırı bilgisi gerektirmeyen** görsel bir Zotero kütüphane düzenleme, derlem denetleme ve akıllı mükerrer (duplicate) birleştirme aracıdır.
-
----
-
-## ✨ Temel Özellikler
-
-1. **🖱️ Çift Tıkla Görsel Web Arayüzü (Sıfır Kurulum):**
-   - `pip install` veya karmaşık terminal komutları gerektirmez. `Baslat.bat` dosyasına çift tıkladığınızda Zotero veri klasörünüzü (`prefs.js` üzerinden özel sürücülerde olsa bile) otomatik bulur ve tarayıcınızda görsel yönetim panelini açar.
-2. **🧠 5 Boyutlu Otomatik Sınıflandırma (Üst Veri + PDF Tam Metin Analizi):**
-   - Yalnızca eser başlığına değil, Zotero'nun `.zotero-ft-cache` tam metin indekslerine de bakarak her kaydı 5 boyutta sınıflandırır:
-     - **1. Hedef Dil & Derlem (`#derlem:...`):** Zazakî/Kirmanckî, Kurmancî, Soranî/Goranî, Genel Kürdoloji, İrani Diller, Türkçe/Türkoloji, Genel Dilbilim.
-     - **2. Gerçek Metin Dili (`#dil:...`):** Otomatik DOI/PDF aktarımlarının yanlışlıkla `en` (İngilizce) olarak işaretlediği Türkçe (`tr`), Kirmanckî (`zza`), Kurmancî (`kmr`), Soranî (`ckb`), Almanca (`de`) ve Farsça/Arapça (`fa`) eserlerin dil kodlarını tespit edip düzeltir.
-     - **3. Eser Türü (`#tur:...`):** Sözlük, Gramer Kitabı, Tez, Dergi/Gazete Sayısı, Edebi/Folklorik Metin, Hakemli Makale, Sempozyum Bildirisi, Kitap/Kitap Bölümü, Ön Baskı (arXiv).
-     - **4. Araştırma Konusu (`#konu:...`):** Morfoloji & Allomorfi, Fonoloji & Sesbilim, Sözdizimi & Tipoloji, Anlambilim & Kip-Zaman (TAM), Sözlükbilim & Etimoloji, Derlem Dilbilimi, NLP & Hesaplamalı Dilbilim, Söylem & Toplumdilbilim, Diyalektoloji, Dil Eğitimi, Edebiyat & Tarih.
-     - **5. Derlem Kalite Kontrol (`#kontrol:...`):** Mükerrer adayları, üst kaydı olmayan (`standalone`) PDF'ler, fiziksel dosyası eksik kayıtlar, metin katmanı olmayan (**OCR gerektiren**) taranmış PDF'ler.
-3. **🧹 Akıllı Mükerrer Birleştirici ve Tek Dosyaya İndirme:**
-   - **SHA-256 PDF Dosya Özeti**, **DOI** ve **Normalize Başlık/Yazar** eşleşmelerini birlikte kullanır.
-   - Her mükerrer kümesinde **en kapsamlı kaynakçaya (üst veriye) sahip olan kaydı** otomatik seçer.
-   - Silinecek kopyalardaki eksik künye alanlarını (DOI, özet, dergi, sayı, sayfa, ISBN), koleksiyonları ve notları ana kayda aktarır.
-   - Kümedeki PDF'ler arasından **en sağlam tek PDF dosyasını** ana kayda bağlar (başıboş duran PDF'leri ilgili künyenin alt eki yapar) ve fazlalık PDF klasörlerini silerek yüzlerce MB disk alanı kazandırır.
-   - **Yanlış Birleştirme Korumaları:** Üniversite tez kapağı başlıklarını (*"T.C. ... Üniversitesi Sosyal Bilimler Enstitüsü"*, *"A Thesis Submitted to..."*), aynı kitaptaki farklı kitap bölümlerini (`bookSection`) ve kitap eleştirilerini (*book review*) birbirine karıştırmaz.
-4. **💾 Otomatik Yedekleme ve Tek Tıkla Geri Yükleme:**
-   - Veritabanına dokunan her işlemden önce tarih damgalı `.bak` yedeği alır; arayüzden tek tıkla istediğiniz yedeğe geri dönebilirsiniz.
+![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)
+![Zero Dependencies](https://img.shields.io/badge/Ba%C4%9F%C4%B1ml%C4%B1l%C4%B1k%20%2F%20Dependencies-S%C4%B1f%C4%B1r%20(Zero)-brightgreen.svg)
+![Bilingual TR/EN](https://img.shields.io/badge/Dil%20%2F%20Language-TR%20%7C%20EN-orange.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ---
 
-## 🚀 Hızlı Başlangıç (Yazılım Bilgisi Olmayanlar İçin)
+## 🇹🇷 Türkçe Dokümantasyon
 
-1. Bu sayfanın sağ üst kısmındaki yeşil **`<> Code`** düğmesine tıklayıp **`Download ZIP`** seçeneğiyle projeyi indirin ve klasöre çıkartın.
-2. Klasörün içindeki **`Baslat.bat`** (Windows) veya **`baslat.sh`** (macOS / Linux) dosyasına çift tıklayın.
-3. Tarayıcınızda açılan yönetim panelinden:
-   - **`✅ Sınıflandırmayı Şimdi Zotero'ya Uygula`** düğmesiyle tüm koleksiyon ve etiketleri oluşturun.
-   - **`2. Akıllı Mükerrer Birleştirici`** sekmesinden mükerrer kayıtları ve kopya PDF'leri tek dosyaya indirin.
+**Zotero Derlem ve Otomatik Sınıflandırma Yöneticisi**, özellikle dilbilim, Kürdoloji (*Zazakî / Kirmanckî, Kurmancî, Soranî, Goranî*), İrani diller ve Türkoloji çalışan araştırmacıların binlerce kayıttan oluşan Zotero kütüphanelerini **hiçbir yazılım veya komut satırı bilgisi gerektirmeden**, tek tıkla çalışan **iki dilli (TR/EN) Görsel Web Arayüzü (Dashboard)** üzerinden düzenlemek, denetlemek ve mükerrer (duplicate) PDF dosyalarını temizlemek için geliştirilmiş açık kaynaklı bir araçtır.
 
-> 📘 Daha detaylı açıklamalar için **[Adım Adım Kullanım Kılavuzu](docs/KULLANIM_KILAVUZU.md)** sayfasına göz atabilirsiniz.
+> 💡 **Sıfır Kurulum Karmaşası:** Bu proje Python standart kütüphanesi dışında **hiçbir harici paket (`pip install ...`) gerektirmez**. İndirip doğrudan `Baslat.bat` dosyasına çift tıklayarak kullanabilirsiniz.
+
+### ✨ Temel Özellikler
+
+1. **🖥️ Yazılım Bilgisi Gerektirmeyen Görsel Web Arayüzü (`🇹🇷 TR | 🇬🇧 EN`):**
+   - `Baslat.bat` (Windows) veya `./baslat.sh` (macOS/Linux) dosyasına çift tıkladığınızda tarayıcınızda otomatik olarak modern kontrol paneli açılır.
+   - Sağ üstteki **`🇹🇷 TR | 🇬🇧 EN`** düğmesiyle arayüz dilini anında Türkçe ve İngilizce arasında değiştirebilirsiniz.
+2. **🗂️ 5 Boyutlu Otomatik Sınıflandırma ve 52 Koleksiyonluk Hiyerarşi:**
+   - **1. Hedef Dil & Derlem (`#derlem:...`):** `zazaki-kirmancki`, `kurmanci`, `sorani-gorani`, `kurdoloji-genel`, `irani-diller`, `turkce-turkoloji`, `genel-dilbilim`
+   - **2. Metin Dili (`#dil:...`):** Kirmanckî (`zza`), Kurmancî (`kmr`), Soranî (`ckb`), Türkçe (`tr`), İngilizce (`en`), Almanca (`de`), Fransızca (`fr`), Farsça/Arapça (`fa`)
+   - **3. Eser Türü (`#tur:...`):** Sözlükler, Gramerler, Tezler (YL/Doktora), Edebi Metinler & Folklor, Dergi/Gazete Sayıları, Kitap & Bölümler, Hakemli Makaleler, Bildiriler, Ön Baskılar
+   - **4. Konu & Alt Alan (`#konu:...`):** Morfoloji/Allomorfi/Ergativite, Fonoloji, Sözdizimi (Syntax), Anlambilim/Kip-Zaman, Sözlükbilim/Etimoloji, Derlem Dilbilimi, NLP, Söylem/Toplumdilbilim, Diyalektoloji/Ağızlar, Dil Eğitimi, Edebiyat/Tarih
+   - **5. Derlem Denetim & Kalite Kontrol (`#kontrol:...`):** Mükerrer adayları, üst kaydı olmayan (standalone) PDF'ler, fiziksel dosyası eksik kayıtlar, OCR (metin katmanı) gereken taranmış PDF'ler ve dil kodu hatalı (`en` yazılıp Türkçe/Kürtçe/Zazaca olan) eserler.
+3. **🧹 Akıllı Mükerrer (Duplicate) Birleştirme ve Tek Dosyaya İndirme:**
+   - PDF dosyalarının **SHA-256 kriptografik özetlerini**, **DOI** numaralarını ve **normalize edilmiş başlık/yazar** bilgilerini karşılaştırır.
+   - Her mükerrer kümesinde **en kapsamlı kaynakçaya (künyeye) sahip olan kaydı** ana kayıt (*Kazanan*) olarak seçer.
+   - Diğer kopyalardaki eksik künye alanlarını, yazarları, etiketleri, koleksiyon üyeliklerini ve kullanıcı notlarını ana kayda aktarır.
+   - Üst kaydı olmayan (standalone) veya kopya kayıtlardaki **en sağlam tek PDF dosyasını** (varsa PDF içi vurgulamalarıyla birlikte) ana kayda bağlar ve fazlalık PDF klasörlerini (`storage/<KEY>`) silerek yüzlerce MB disk alanı açar.
+4. **🛡️ %100 Veri Güvenliği ve Tek Tıkla Geri Yükleme (Backup & Restore):**
+   - Zotero açıkken bile kütüphaneyi geçici kopya üzerinden kilitlenmeden salt-okunur tarayabilir.
+   - Veritabanına yapılacak her yazma işleminden önce otomatik olarak tarih-saat damgalı tam yedek (`zotero.sqlite.pre-classify_*.bak` veya `zotero.sqlite.pre-dedup_*.bak`) alır.
+
+### 🚀 Hızlı Başlangıç (Yazılım Bilgisi Olmayanlar İçin)
+
+1. Bu depoyu yeşil **`<> Code` -> `Download ZIP`** düğmesiyle indirin ve bir klasöre çıkartın.
+2. Klasörün içindeki **[`Baslat.bat`](file:///D:/Claude/Projects/Zotero-Derlem-Yoneticisi/Baslat.bat)** (Windows) veya **[`baslat.sh`](file:///D:/Claude/Projects/Zotero-Derlem-Yoneticisi/baslat.sh)** (macOS/Linux) dosyasına **çift tıklayın**.
+3. Otomatik açılan `http://127.0.0.1:8765` sayfasından kütüphanenizi tarayın, sınıflandırın veya mükerrerleri birleştirin!
+   - Ayrıntılı görsel anlatım için **[Adım Adım Kullanım Kılavuzu (`docs/KULLANIM_KILAVUZU.md`)](file:///D:/Claude/Projects/Zotero-Derlem-Yoneticisi/docs/KULLANIM_KILAVUZU.md)** belgesine göz atabilirsiniz.
 
 ---
 
-## 💻 İleri Seviye (Komut Satırı / CLI) Kullanımı
+## 🇬🇧 English Documentation
 
-Aracı komut satırından veya otomasyon betiklerinizden de çalıştırabilirsiniz:
+**Zotero Corpus & Automatic Classification Manager** is an open-source, zero-dependency tool designed for linguists and researchers working on Kurdish studies (*Zazaki / Kirmancki, Kurmanji, Sorani, Gorani*), Iranian languages, Turkology, and general linguistics. It organizes, audits, and deduplicates large Zotero libraries through a **one-click bilingual (TR/EN) Visual Web Dashboard** requiring **zero programming or command-line experience**.
+
+> 💡 **Zero Dependency Hassle:** Built 100% on the Python Standard Library (`sqlite3`, `http.server`, `hashlib`, `re`). **No `pip install` is ever required.** Simply download and double-click `Baslat.bat` (Windows) or `./baslat.sh` (macOS/Linux).
+
+### ✨ Key Features
+
+1. **🖥️ No-Code Bilingual Visual Web Dashboard (`🇹🇷 TR | 🇬🇧 EN`):**
+   - Double-clicking `Baslat.bat` or `./baslat.sh` automatically detects your Zotero data folder (`D:\Zotero`, `~/Zotero`, or via `prefs.js`) and opens the local dashboard in your browser.
+   - Switch the entire UI between **Turkish and English** anytime using the **`🇹🇷 TR | 🇬🇧 EN`** button in the top-right corner.
+2. **🗂️ 5-Dimensional Automatic Classification & 52-Collection Hierarchy:**
+   - **1. Target Corpus (`#derlem:...`):** `zazaki-kirmancki`, `kurmanci`, `sorani-gorani`, `kurdoloji-genel`, `irani-diller`, `turkce-turkoloji`, `genel-dilbilim`
+   - **2. Document Language (`#dil:...`):** Kirmancki (`zza`), Kurmanji (`kmr`), Sorani (`ckb`), Turkish (`tr`), English (`en`), German (`de`), French (`fr`), Persian/Arabic (`fa`)
+   - **3. Publication Type (`#tur:...`):** Dictionaries, Grammars, Theses (MA/PhD), Literary & Folklore Texts, Journals/Newspapers, Books & Chapters, Peer-Reviewed Articles, Conference Papers, Preprints
+   - **4. Research Topic (`#konu:...`):** Morphology/Allomorphy/Ergativity, Phonology, Syntax & Typology, Semantics/TAM, Lexicography/Etymology, Corpus Linguistics, NLP, Discourse/Sociolinguistics, Dialectology, Language Education, Literature/History
+   - **5. Quality Audit (`#kontrol:...`):** Duplicate candidates, standalone PDFs without parent metadata, missing physical files, scanned PDFs requiring OCR, and items with wrong ISO language codes (e.g., marked `en` when written in Turkish, Kurmanji, or Zazaki).
+3. **🧹 Smart Duplicate Merging & Single-File Consolidation:**
+   - Matches duplicates across **SHA-256 physical file hashes**, **DOIs**, and **normalized titles/authors** (with built-in false-positive guards for shared book-chapter PDFs, book reviews, and university thesis cover headers).
+   - Scores every item in a duplicate cluster and keeps the **master record with the most comprehensive bibliography** (*Winner*).
+   - Merges any missing metadata fields, creators, collection links, tags, and child notes from duplicate copies into the winning master record.
+   - Reparents the **single best physical PDF file** (preserving PDF highlights/annotations) to the winning record and deletes redundant `storage/<KEY>` folders.
+4. **🛡️ 100% Data Safety & One-Click Backup/Restore:**
+   - Reads your Zotero database safely via a temporary snapshot (`zotero.sqlite` + `-wal` + `-shm`) even while Zotero is open.
+   - Automatically creates a timestamped `.bak` backup before every write operation.
+
+---
+
+## 💻 Komut Satırı Kullanımı / Command-Line Interface (CLI)
 
 ```bash
-# 1. Görsel Web Arayüzünü başlat (Varsayılan)
-python zotero_cli.py gui
+# [TR] Görsel Web Arayüzünü başlatır (Varsayılan) / [EN] Launch Visual Web Dashboard (Default)
+python -X utf8 zotero_cli.py gui
 
-# 2. Salt-okunur tarama yap ve Markdown / Excel (CSV) / JSON raporları üret
-python zotero_cli.py scan
+# [TR] Kütüphaneyi salt-okunur tarar ve rapor üretir / [EN] Read-only scan & export reports (MD, CSV, JSON)
+python -X utf8 zotero_cli.py scan
 
-# 3. Otomatik sınıflandırmayı, koleksiyon ağacını ve dil düzeltmelerini uygula
-python zotero_cli.py classify
+# [TR] Otomatik sınıflandırmayı Zotero'ya uygular / [EN] Apply collections, tags & ISO language fixes
+python -X utf8 zotero_cli.py classify
 
-# 4. Mükerrer birleştirme planını önizle (hiçbir şeyi silmez)
-python zotero_cli.py dedup --dry-run
+# [TR] Mükerrer birleştirme planını önizler (silme yapmaz) / [EN] Preview duplicate consolidation (dry-run)
+python -X utf8 zotero_cli.py dedup --dry-run
 
-# 5. Mükerrerleri en kapsamlı kaynakçayla birleştir ve tek dosyaya indir
-python zotero_cli.py dedup
+# [TR] Mükerrerleri en zengin kaynakçayla birleştirir / [EN] Execute duplicate consolidation & delete redundant PDFs
+python -X utf8 zotero_cli.py dedup
 
-# 6. Alınan veritabanı yedeklerini listele ve geri yükle
-python zotero_cli.py backups
-python zotero_cli.py restore "D:\Zotero\zotero.sqlite.pre-dedup_20261106.bak"
+# [TR] Veritabanı yedeklerini listeler ve geri yükler / [EN] List and restore database backups
+python -X utf8 zotero_cli.py backups
+python -X utf8 zotero_cli.py restore "D:\Zotero\zotero.sqlite.pre-dedup_20261107.bak"
 ```
 
 ---
 
-## 🗂️ Proje Mimarisi
+## 📁 Proje Yapısı / Repository Structure
 
 ```text
 Zotero-Derlem-Yoneticisi/
-├── Baslat.bat                  # Windows için çift tıkla görsel arayüz başlatıcı
-├── baslat.sh                   # macOS / Linux için başlatıcı
-├── zotero_cli.py               # Birleşik CLI ve GUI giriş noktası
+├── Baslat.bat                  # [TR] Windows tek tıkla başlatıcı / [EN] Windows one-click launcher
+├── baslat.sh                   # [TR] macOS & Linux başlatıcı / [EN] macOS & Linux launcher
+├── zotero_cli.py               # [TR] Ana giriş noktası (GUI & CLI) / [EN] Main entry point
 ├── config/
-│   └── default_rules.json      # Kod yazmadan düzenlenebilir dil, derlem ve konu kuralları
+│   └── default_rules.json      # [TR/EN] Özelleştirilebilir dil, derlem ve konu kuralları / Customizable rules
 ├── zotero_manager/
-│   ├── __init__.py
-│   ├── detector.py             # Zotero veri dizini (prefs.js) ve süreç tespiti
-│   ├── reader.py               # Salt-okunur güvenli SQLite + .zotero-ft-cache okuyucu
-│   ├── classifier.py           # 5 boyutlu sınıflandırma motoru
-│   ├── deduplicator.py         # SHA-256, DOI ve Başlık/Yazar tabanlı mükerrer birleştirici
-│   ├── applier.py              # Yedekleme, geri yükleme ve SQLite işlem motoru
-│   ├── reporter.py             # Markdown, Excel (UTF-8 BOM CSV) ve JSON rapor üreteci
-│   └── web_ui.py               # Sıfır bağımlılıklı yerel Görsel Web Arayüzü
+│   ├── __init__.py             # [TR/EN] Paket tanımı / Package metadata
+│   ├── detector.py             # [TR/EN] Otomatik Zotero dizini ve süreç tespiti / Auto-detection & process control
+│   ├── reader.py               # [TR/EN] Güvenli salt-okunur veritabanı okuyucu / Safe snapshot reader
+│   ├── classifier.py           # [TR/EN] 5 boyutlu sınıflandırma motoru / 5D classification engine
+│   ├── deduplicator.py         # [TR/EN] Akıllı mükerrer birleştirme motoru / Smart deduplication engine
+│   ├── applier.py              # [TR/EN] SQLite yazma ve yedekleme motoru / SQLite writer & backup manager
+│   ├── reporter.py             # [TR/EN] İki dilli MD ve Excel CSV rapor üretici / Bilingual report generator
+│   └── web_ui.py               # [TR/EN] İki dilli Görsel Web Arayüzü / Bilingual Visual Web Dashboard
 ├── docs/
-│   └── KULLANIM_KILAVUZU.md    # Son kullanıcılar için adım adım kılavuz
-├── tests/
-│   └── test_engine.py          # Otomatik birim testleri
-├── pyproject.toml              # Standart Python paket yapılandırması
-└── LICENSE                     # MIT Lisansı
+│   └── KULLANIM_KILAVUZU.md    # [TR/EN] Adım adım kullanım kılavuzu / Step-by-step user guide
+├── reports/
+│   └── zotero_derlem_raporu.md # [TR/EN] Örnek denetim raporu / Sample corpus audit report
+└── tests/
+    └── test_engine.py          # [TR/EN] Birim testleri / Automated unit tests
 ```
 
----
-
-## 🧪 Testleri Çalıştırma
+## 🧪 Testler / Running Tests
 
 ```bash
-python -m unittest discover -s tests -v
+python -X utf8 -m unittest discover -s tests -v
 ```
 
-## 📄 Lisans
+## 📄 Lisans / License
 
-Bu proje [MIT Lisansı](LICENSE) altında açık kaynaklı olarak sunulmaktadır.
+MIT License — [`LICENSE`](file:///D:/Claude/Projects/Zotero-Derlem-Yoneticisi/LICENSE)

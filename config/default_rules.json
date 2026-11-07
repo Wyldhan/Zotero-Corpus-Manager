@@ -1,16 +1,20 @@
 {
-  "version": "1.0.0",
+  "_comment_tr": "Zotero Derlem ve Sınıflandırma Yöneticisi - Özelleştirilebilir Kurallar Dosyası",
+  "_comment_en": "Zotero Corpus & Classification Manager - Customizable Rules Configuration File",
+  "version": "1.1.0",
   "collection_roots": {
-    "derlem": "1. Derlemler & Hedef Diller",
-    "dil": "2. Metin Diline Göre",
-    "tur": "3. Eser Türüne Göre",
-    "konu": "4. Konu & Alt Alanlara Göre",
-    "kontrol": "5. Derlem Denetim & Kalite Kontrol"
+    "derlem": "1. Derlemler & Hedef Diller / Target Corpora",
+    "dil": "2. Metin Diline Göre / By Document Language",
+    "tur": "3. Eser Türüne Göre / By Item Type",
+    "konu": "4. Konu & Alt Alanlara Göre / By Topic & Subfield",
+    "kontrol": "5. Derlem Denetim & Kalite Kontrol / Corpus Audit & QA"
   },
   "languages": [
     {
       "id": "kirmancki",
       "iso": "zza",
+      "label_tr": "Kirmanckî (Zazakî)",
+      "label_en": "Kirmanjki (Zazaki)",
       "collection": "Dil: Kirmanckî (Zazakî)",
       "keywords": [
         "çekuy\\w*", "rawey\\w*", "nameyê", "mîyanê", "hûmar\\w*", "rîpel\\w*",
@@ -24,6 +28,8 @@
     {
       "id": "kurmanci",
       "iso": "kmr",
+      "label_tr": "Kurmancî",
+      "label_en": "Kurmanji (Northern Kurdish)",
       "collection": "Dil: Kurmancî",
       "keywords": [
         "lêker\\w*", "hevok\\w*", "peyv\\w*", "rêziman\\w*", "veqetandek\\w*",
@@ -35,12 +41,16 @@
     {
       "id": "sorani",
       "iso": "ckb",
+      "label_tr": "Soranî (Arap-Kürt Alfabesi)",
+      "label_en": "Sorani (Central Kurdish)",
       "collection": "Dil: Soranî (Arap-Kürt Alfabesi)",
       "keywords": ["کورد", "زمانی", "فەرهەنگ", "ڕێزمان", "گۆڤاری"]
     },
     {
       "id": "turkce",
       "iso": "tr",
+      "label_tr": "Türkçe",
+      "label_en": "Turkish",
       "collection": "Dil: Türkçe",
       "keywords": [
         "üzerine", "inceleme", "araştırma\\w*", "özet", "giriş", "sonuç",
@@ -53,6 +63,8 @@
     {
       "id": "almanca",
       "iso": "de",
+      "label_tr": "Almanca",
+      "label_en": "German",
       "collection": "Dil: Almanca",
       "keywords": [
         "untersuchung", "sprache", "grammatik", "verbfunktionalität",
@@ -63,6 +75,8 @@
     {
       "id": "fransizca",
       "iso": "fr",
+      "label_tr": "Fransızca",
+      "label_en": "French",
       "collection": "Dil: Fransızca",
       "keywords": [
         "langue", "étude", "grammaire", "kurde", "approche", "linguistique", "syntaxe"
@@ -71,12 +85,16 @@
     {
       "id": "farsca-arapca",
       "iso": "fa",
+      "label_tr": "Farsça & Arapça",
+      "label_en": "Persian & Arabic",
       "collection": "Dil: Farsça & Arapça",
       "keywords": []
     },
     {
       "id": "ingilizce",
       "iso": "en",
+      "label_tr": "İngilizce",
+      "label_en": "English",
       "collection": "Dil: İngilizce",
       "keywords": []
     }
@@ -85,7 +103,7 @@
     {
       "id": "zazaki-kirmancki",
       "collection": "1.1 Zazakî / Kirmanckî Derlemi",
-      "description": "Zazakî/Kirmanckî dilbilgisi, sözlük, ağız, edebiyat ve Kirmanckî metinler",
+      "description": "Zazakî/Kirmanckî dilbilgisi, sözlük, ağız, edebiyat ve Kirmanckî metinler / Zazaki grammar, lexicon, dialectology, literature, and texts",
       "keywords": [
         "zaza", "zazaki", "zazakî", "zazaca\\w*", "kirmanck\\w*", "kirdk\\w*",
         "kırdk\\w*", "dimil\\w*", "dımıl\\w*", "sobe\\s+zaza", "zaza-sprache",
@@ -97,7 +115,7 @@
     {
       "id": "kurmanci",
       "collection": "1.2 Kurmancî Derlemi",
-      "description": "Kurmancî dilbilgisi, sözlük, NLP, edebiyat ve toplumdilbilim çalışmaları",
+      "description": "Kurmancî dilbilgisi, sözlük, NLP, edebiyat ve toplumdilbilim çalışmaları / Kurmanji grammar, lexicon, NLP, literature, and sociolinguistics",
       "keywords": [
         "kurmanc\\w*", "kurmanj\\w*", "kurmancî", "kuzey\\s+kürtçe\\w*",
         "northern\\s+kurdish", "badîn\\w*", "bahdîn\\w*", "botan\\b",
@@ -107,7 +125,7 @@
     {
       "id": "sorani-gorani",
       "collection": "1.3 Soranî, Goranî & Güney Kürtçesi",
-      "description": "Soranî, Goranî/Hewramî, Kelhurî ve Lekî çalışmaları",
+      "description": "Soranî, Goranî/Hewramî, Kelhurî ve Lekî çalışmaları / Sorani, Gorani/Hawrami, Kalhori, and Laki studies",
       "keywords": [
         "soran\\w*", "central\\s+kurdish", "hewram\\w*", "hawram\\w*",
         "gorani", "gurani", "gūrānī", "goranî", "kelhur\\w*", "kalhor\\w*",
@@ -117,7 +135,7 @@
     {
       "id": "kurdoloji-genel",
       "collection": "1.4 Kürdoloji (Genel & Karşılaştırmalı)",
-      "description": "Birden fazla Kürt lehçesini kapsayan veya genel Kürdoloji yayınları",
+      "description": "Birden fazla Kürt lehçesini kapsayan veya genel Kürdoloji yayınları / General & comparative Kurdish studies",
       "keywords": [
         "kurd\\w*", "kürt\\w*", "kurdish", "kurdî", "kürtçe\\w*", "kurdistan\\w*", "kürdoloji\\w*"
       ]
@@ -125,7 +143,7 @@
     {
       "id": "irani-diller",
       "collection": "1.5 İrani Diller & Hint-İran",
-      "description": "Farsça, Beluçça, Koroshi, Talışça, Osetçe, Orta İrani ve karşılaştırmalı İrani diller",
+      "description": "Farsça, Beluçça, Koroshi, Talışça, Osetçe, Orta İrani ve karşılaştırmalı İrani diller / Iranian & Indo-Iranian languages",
       "keywords": [
         "iranian", "irani\\s+dil\\w*", "indo-iranian", "persian", "farsça", "farsi",
         "baloch\\w*", "beluç\\w*", "koroshi", "gilaki", "mazandaran\\w*", "talysh\\w*",
@@ -136,7 +154,7 @@
     {
       "id": "turkce-turkoloji",
       "collection": "1.6 Türkçe & Türkoloji Derlemi",
-      "description": "Türkiye Türkçesi, Osmanlıca, ağız araştırmaları ve Türkçe eğitimi/NLP",
+      "description": "Türkiye Türkçesi, Osmanlıca, ağız araştırmaları ve Türkçe eğitimi/NLP / Turkish & Turkic linguistics, dialectology, and NLP",
       "keywords": [
         "türkçe\\w*", "türk\\s+dil\\w*", "turkish\\b", "turkic\\b",
         "osmanlı\\s+türkçe\\w*", "eski\\s+anadolu\\s+türkçe\\w*",
@@ -147,7 +165,7 @@
     {
       "id": "genel-dilbilim",
       "collection": "1.7 Genel Dilbilim & Dünya Dilleri",
-      "description": "Kuramsal dilbilim, derlem dilbilimi, tipoloji ve İngilizce/diğer dünya dilleri",
+      "description": "Kuramsal dilbilim, derlem dilbilimi, tipoloji ve İngilizce/diğer dünya dilleri / General, theoretical, corpus, and typological linguistics",
       "keywords": []
     }
   ],

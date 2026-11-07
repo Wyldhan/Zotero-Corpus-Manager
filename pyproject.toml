@@ -1,23 +1,27 @@
+# [TR] Standart Python Paket Yapılandırması (Sıfır Dış Bağımlılık)
+# [EN] Standard Python Package Configuration (Zero External Dependencies)
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "zotero-derlem-yoneticisi"
-version = "1.0.0"
-description = "Zotero kütüphaneleri için yazılım bilgisi gerektirmeyen otomatik sınıflandırma, derlem denetimi ve akıllı mükerrer birleştirme aracı."
+version = "1.1.0"
+description = "TR: Zotero kütüphaneleri için otomatik sınıflandırma, derlem denetimi ve akıllı mükerrer birleştirme aracı. | EN: Zero-dependency automatic classification, corpus auditing, and smart deduplication tool for Zotero libraries."
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
-  {name = "Zotero Derlem Yöneticisi Ekibi"}
+  {name = "Zotero Derlem Yöneticisi / Zotero Corpus Manager Contributors"}
 ]
-keywords = ["zotero", "corpus", "linguistics", "kurdish", "zazaki", "kirmancki", "deduplication", "bibliography"]
+keywords = ["zotero", "corpus", "linguistics", "kurdish", "zazaki", "kirmancki", "kurmanji", "sorani", "deduplication", "bibliography"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Science/Research",
   "Intended Audience :: Education",
   "License :: OSI Approved :: MIT License",
+  "Natural Language :: Turkish",
+  "Natural Language :: English",
   "Programming Language :: Python :: 3",
   "Topic :: Text Processing :: Linguistic",
 ]

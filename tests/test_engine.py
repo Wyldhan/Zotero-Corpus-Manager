@@ -1,10 +1,25 @@
+"""
+[TR] Zotero Sınıflandırma ve Akıllı Mükerrer Birleştirme Motoru Birim Testleri.
+[EN] Unit Tests for the Zotero Classification and Smart Deduplication Engine.
+"""
 import unittest
 from zotero_manager.classifier import classify_library
 from zotero_manager.deduplicator import find_duplicate_clusters, score_item_metadata
 
 
 class TestZoteroEngine(unittest.TestCase):
+    """
+    [TR] Sınıflandırma, tekrar çalıştırılabilirlik (idempotency) ve mükerrer korumalarını doğrular.
+    [EN] Verifies classification accuracy, idempotency, and duplicate false-positive guards.
+    """
+
     def test_classification_and_idempotency(self):
+        """
+        [TR] Kirmanckî/Zazakî metin tespiti, hatalı dil kodu ('en'->'zza') yakalama ve
+             '#derlem:' etiketinin yanlışlıkla '#konu:derlem-dilbilimi' üretmemesini test eder.
+        [EN] Tests Kirmancki/Zazaki detection, wrong language code ('en'->'zza') audit flagging,
+             and ensures '#derlem:' auto-tags do not falsely trigger '#konu:derlem-dilbilimi'.
+        """
         entries = {
             1: {
                 "itemID": 1,
@@ -30,10 +45,17 @@ class TestZoteroEngine(unittest.TestCase):
         self.assertIn("morfoloji-allomorfi", r1["konular"])
         self.assertIn("diyalektoloji-agiz", r1["konular"])
         self.assertIn("dil-kodu-hatali", r1["kontroller"])
-        # Idempotency check: #derlem:zazaki-kirmancki tag must NOT trigger #konu:derlem-dilbilimi
+        # [TR] Tekrar çalıştırılabilirlik (Idempotency) kontrolü
+        # [EN] Idempotency check: #derlem:zazaki-kirmancki tag must NOT trigger #konu:derlem-dilbilimi
         self.assertNotIn("derlem-dilbilimi", r1["konular"])
 
     def test_dedup_winner_selection_and_guards(self):
+        """
+        [TR] En kapsamlı kaynakçaya sahip kaydın 'Kazanan' seçildiğini, üst kayıtsız PDF'in
+             ona bağlandığını ve farklı yazarlı jenerik tez kapaklarının birleştirilmediğini doğrular.
+        [EN] Verifies that the item with the richest bibliography is chosen as 'Winner', the
+             standalone PDF is linked to it, and generic thesis headers with different authors are NOT merged.
+        """
         items = {
             10: {
                 "itemID": 10,
@@ -70,7 +92,8 @@ class TestZoteroEngine(unittest.TestCase):
                 ],
                 "notes_count": 0,
             },
-            # Different authors with generic university cover page title -> MUST NOT MERGE
+            # [TR] Farklı yazarlara ait jenerik enstitü başlıkları -> KESİNLİKLE BİRLEŞTİRİLMEMELİ
+            # [EN] Different authors with generic university cover page title -> MUST NOT MERGE
             20: {
                 "itemID": 20,
                 "key": "COV00020",
