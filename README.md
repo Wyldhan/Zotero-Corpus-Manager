@@ -1,8 +1,8 @@
-# 📚 Zotero Derlem ve Otomatik Sınıflandırma Yöneticisi / Zotero Corpus & Automatic Classification Manager
+# 📚 Zotero Corpus & Automatic Classification Manager / Zotero Derlem ve Sınıflandırma Yöneticisi
 
 <p align="center">
-  <strong><a href="#-türkçe-dokümantasyon">🇹🇷 Türkçe Dokümantasyon</a></strong> &nbsp;|&nbsp;
-  <strong><a href="#-english-documentation">🇬🇧 English Documentation</a></strong>
+  <strong><a href="#-english-documentation">🇬🇧 English Documentation</a></strong> &nbsp;|&nbsp;
+  <strong><a href="#-türkçe-dokümantasyon">🇹🇷 Türkçe Dokümantasyon</a></strong>
 </p>
 
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)
@@ -103,7 +103,7 @@ python -X utf8 zotero_cli.py restore "D:\Zotero\zotero.sqlite.pre-dedup_20261107
 ## 📁 Proje Yapısı / Repository Structure
 
 ```text
-Zotero-Derlem-Yoneticisi/
+Zotero-Corpus-Manager/
 ├── Baslat.bat                  # [TR] Windows tek tıkla başlatıcı / [EN] Windows one-click launcher
 ├── baslat.sh                   # [TR] macOS & Linux başlatıcı / [EN] macOS & Linux launcher
 ├── zotero_cli.py               # [TR] Ana giriş noktası (GUI & CLI) / [EN] Main entry point
